@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>词汇记忆小短文 | Vocabulary Stories</title>
+<style>
+  :root {
+    --bg: #f8f6f0;
+    --card-bg: #ffffff;
+    --text: #2c2c2c;
+    --text-muted: #666;
+    --accent: #e8a838;
+    --accent-light: #fff8e1;
+    --green: #4caf50;
+    --green-light: #e8f5e9;
+    --blue: #2196f3;
+    --blue-light: #e3f2fd;
+    --purple: #9c27b0;
+    --purple-light: #f3e5f5;
+    --border: #e0dccd;
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Georgia', 'Noto Serif SC', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.9;
+    padding: 0;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #e8a838, #d4791e);
+    color: #fff;
+    text-align: center;
+    padding: 48px 20px 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.12);
+  }
+  header h1 { font-size: 2.2em; margin-bottom: 8px; }
+  header p { font-size: 1.05em; opacity: .92; }
+  .word-count {
+    display: inline-block;
+    background: rgba(255,255,255,.22);
+    border-radius: 20px;
+    padding: 4px 18px;
+    margin-top: 14px;
+    font-size: .9em;
+  }
+  .toggle-bar {
+    margin-top: 18px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .toggle-btn {
+    background: rgba(255,255,255,.25);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,.5);
+    border-radius: 24px;
+    padding: 8px 22px;
+    font-size: .95em;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: inherit;
+  }
+  .toggle-btn:hover {
+    background: rgba(255,255,255,.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  }
+  .toggle-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 12px 16px 6px;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--text);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: .8em;
+    transition: all .2s;
+    font-family: sans-serif;
+    flex-shrink: 0;
+  }
+  nav a:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  nav a.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .nav-toggle { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 4px 12px; font-size: .8em; cursor: pointer; color: var(--text); transition: all .2s; flex-shrink: 0; }
+  .nav-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  #nav { max-height: 60vh; overflow-y: auto; transition: max-height .3s ease; }
+  #nav.collapsed { padding: 10px 20px 16px; max-height: 60px; overflow: hidden; }
+  #nav.collapsed a { display: none; }
+  #nav.collapsed .nav-toggle { display: inline-block; }
+  #nav:not(.collapsed) { padding: 16px 20px; }
+
+  /* Main */
+  main { max-width: 860px; margin: 0 auto; padding: 40px 20px 60px; }
+
+  .story {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    border: 1px solid var(--border);
+    scroll-margin-top: 140px;
+  }
+  .story-header { margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 16px; cursor: pointer; user-select: none; }
+  .story-header h2 { font-size: 1.6em; margin-bottom: 6px; color: var(--text); }
+  .story-header .en-title { font-size: 1.1em; color: var(--text-muted); font-style: italic; }
+  .story-header .meta { font-size: .82em; color: var(--accent); margin-top: 8px; }
+  .story-header::after { content: '▼ 点击折叠'; float: right; font-size: .7em; color: var(--text-muted); margin-top: 10px; transition: transform .3s; }
+  .story-header.collapsed::after { content: '▶ 点击展开'; }
+  .story-header.collapsed { margin-bottom: 0; border-bottom: none; padding-bottom: 8px; }
+  .story-header.collapsed .en-title, .story-header.collapsed .meta { display: none; }
+  .story-header.collapsed h2 { font-size: 1.2em; margin-bottom: 0; }
+
+  /* Vocabulary highlight styles */
+  .v {
+    border-radius: 4px;
+    padding: 1px 6px 1px 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    user-select: none;
+    white-space: normal;
+    line-height: 1.6;
+    display: inline;
+  }
+  .v .sp-icon {
+    display: inline-block;
+    font-size: .75em;
+    opacity: .5;
+    margin-right: 2px;
+    vertical-align: middle;
+    transition: opacity .2s;
+  }
+  .v:hover .sp-icon { opacity: 1; }
+  .v.speaking {
+    animation: pulse .6s ease;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  .v.speaking .sp-icon { opacity: 1; animation: bounce .4s ease infinite; display: inline-block; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-2px) scale(1.3); }
+  }
+  .v-yellow  { background: #fff59d; border-bottom: 2px solid #fbc02d; }
+  .v-green   { background: #c8e6c9; border-bottom: 2px solid #4caf50; }
+  .v-blue    { background: #bbdefb; border-bottom: 2px solid #2196f3; }
+  .v-purple  { background: #e1bee7; border-bottom: 2px solid #9c27b0; }
+  .v-orange  { background: #ffe0b2; border-bottom: 2px solid #ff9800; }
+  .v-teal    { background: #b2dfdb; border-bottom: 2px solid #009688; }
+  .v-red     { background: #ffcdd2; border-bottom: 2px solid #f44336; }
+  .v-cyan    { background: #b2ebf2; border-bottom: 2px solid #00bcd4; }
+  .v-pink    { background: #f8bbd0; border-bottom: 2px solid #e91e63; }
+  .v-brown   { background: #d7ccc8; border-bottom: 2px solid #795548; }
+  .v-gold    { background: #fff9c4; border-bottom: 2px solid #f9a825; }
+  .v-indigo  { background: #c5cae9; border-bottom: 2px solid #3f51b5; }
+  .v-lime    { background: #ecfccb; border-bottom: 2px solid #84cc16; }
+  .v-magenta { background: #f5d0fe; border-bottom: 2px solid #c026d3; }
+  .v-navy    { background: #c7d2fe; border-bottom: 2px solid #1e40af; }
+
+  .v .cn {
+    font-size: .82em;
+    font-weight: normal;
+    color: #555;
+    margin-left: 2px;
+    display: none;
+  }
+  .v.cn-shown .cn {
+    display: inline;
+  }
+
+  /* Word card click styles */
+  .word-card { cursor: pointer; }
+  .word-card.speaking .en { color: var(--accent); }
+
+  /* Paragraph */
+  .para { margin-bottom: 28px; }
+  .para-en { font-size: 1.08em; line-height: 2.1; }
+  .para-cn {
+    background: #fafaf5;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 18px;
+    margin-top: 10px;
+    font-size: .98em;
+    color: #555;
+    line-height: 1.85;
+  }
+
+  /* Word list */
+  .word-list-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    border: 1px solid var(--border);
+    scroll-margin-top: 140px;
+  }
+  .word-list-section h2 { font-size: 1.5em; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+  .word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .word-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s;
+  }
+  .word-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); transform: translateY(-1px); }
+  .word-card .en { font-weight: 700; font-size: .98em; }
+  .word-card .cn { font-size: .85em; color: var(--text-muted); display: none; }
+  .word-card.cn-shown .cn { display: inline; }
+
+  /* View toggle buttons for word list */
+  .view-toggle {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .view-btn {
+    background: var(--surface-muted, #f5f5f7);
+    border: 2px solid var(--border, #d2d2d7);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: .88em;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: inherit;
+    color: var(--text, #1d1d1f);
+  }
+  .view-btn:hover {
+    border-color: var(--accent, #667eea);
+    color: var(--accent, #667eea);
+  }
+  .view-btn.active {
+    background: var(--accent, #667eea);
+    border-color: var(--accent, #667eea);
+    color: #fff;
+  }
+
+  /* View modes for word cards */
+  .word-grid.view-en .word-card .cn { display: none !important; }
+  .word-grid.view-en .word-card.cn-shown .cn { display: inline !important; }
+  .word-grid.view-cn .word-card .en { display: none !important; }
+  .word-grid.view-cn .word-card .cn { display: inline !important; }
+  .word-grid.view-cn .word-card.en-shown .en { display: inline !important; }
+  .word-grid.view-all .word-card .cn { display: inline; }
+  .word-grid.view-all .word-card.cn-shown .cn { display: inline; }
+  .word-grid.view-all .word-card .en { display: inline; }
+
+  /* Star / important word styles */
+  .word-card.starred {
+    background: #fff9e6;
+    border-color: #ffd93d;
+  }
+  .word-card .star-icon {
+    margin-left: auto;
+    font-size: .85em;
+    opacity: .3;
+    transition: all .2s;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .word-card.starred .star-icon {
+    opacity: 1;
+    color: #ffc107;
+  }
+
+  /* Selection mode styles */
+  .word-grid.select-mode .word-card {
+    cursor: pointer;
+    position: relative;
+  }
+  .word-grid.select-mode .word-card.selected {
+    border-color: var(--accent, #667eea);
+    background: #eef0ff;
+  }
+  .word-grid.select-mode .word-card.selected.starred {
+    background: #e8e4ff;
+    border-color: var(--accent, #667eea);
+  }
+  .word-card .select-check {
+    display: none;
+    margin-left: auto;
+    color: var(--accent, #667eea);
+    font-weight: bold;
+    font-size: 1.1em;
+  }
+  .word-grid.select-mode .word-card.selected .select-check {
+    display: inline;
+  }
+  .word-grid.select-mode .word-card .star-icon {
+    display: none;
+  }
+
+  /* Filter starred only */
+  .word-grid.filter-starred .word-card:not(.starred) {
+    display: none;
+  }
+
+  /* Star toolbar */
+  .star-toolbar {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .star-btn {
+    background: var(--surface-muted, #f5f5f7);
+    border: 2px solid var(--border, #d2d2d7);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: .85em;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: inherit;
+    color: var(--text, #1d1d1f);
+  }
+  .star-btn:hover {
+    border-color: #ffc107;
+    color: #f57f17;
+  }
+  .star-btn.active {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #fff;
+  }
+  .star-btn.star-action {
+    background: #fff9e6;
+    border-color: #ffd93d;
+  }
+  .star-btn.star-action:hover {
+    background: #ffd93d;
+    color: #fff;
+  }
+  .star-count {
+    font-size: .85em;
+    color: var(--text-muted, #86868b);
+    margin-left: 8px;
+  }
+
+  .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .dot-yellow { background:#fbc02d; }
+  .dot-green  { background:#4caf50; }
+  .dot-blue   { background:#2196f3; }
+  .dot-purple { background:#9c27b0; }
+  .dot-orange { background:#ff9800; }
+  .dot-teal   { background:#009688; }
+  .dot-red    { background:#f44336; }
+  .dot-cyan   { background:#00bcd4; }
+  .dot-pink   { background:#e91e63; }
+  .dot-brown  { background:#795548; }
+  .dot-gold   { background:#f9a825; }
+  .dot-indigo { background:#3f51b5; }
+  .dot-lime   { background:#84cc16; }
+  .dot-magenta{ background:#c026d3; }
+  .dot-navy   { background:#1e40af; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-size: .85em;
+    color: var(--text-muted);
+  }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+
+  footer { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: .85em; }
+
+  @media (max-width: 600px) {
+    .story { padding: 24px 18px; }
+    .para-en { font-size: 1em; }
+    header h1 { font-size: 1.6em; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>词汇记忆小短文</h1>
+  <p>Vocabulary Stories — 在故事中轻松记单词</p>
+  <div class="word-count">共收录 1317 个标黄词汇 · 15 篇小短文</div>
+  <div class="toggle-bar">
+    <button class="toggle-btn toggle-show" onclick="toggleAllCn(true)">👁 显示全部中文</button>
+    <button class="toggle-btn toggle-hide" onclick="toggleAllCn(false)">🙈 隐藏全部中文</button>
+  </div>
+</header>
+
+<nav id="nav" class="collapsed">
+  <a href="#wordlist">词汇总表</a>
+  <a href="#story1" class="active">故事一：开学第一天</a>
+  <a href="#story2">故事二：周末大扫除</a>
+  <a href="#story3">故事三：第一份实习</a>
+  <a href="#story4">故事四：郊外徒步</a>
+  <a href="#story5">故事五：超市大采购</a>
+  <a href="#story6">故事六：学做蛋糕</a>
+  <a href="#story7">故事七：健身房的一天</a>
+  <a href="#story8">故事八：智能家居</a>
+  <a href="#story9">故事九：生日派对</a>
+  <a href="#story10">故事十：小区的夏天</a>
+  <a href="#story11">故事十一：备考的日子</a>
+  <a href="#story12">故事十二：春节回家</a>
+  <a href="#story13">故事十三：法庭与正义</a>
+  <a href="#story14">故事十四：探索与冒险</a>
+  <a href="#story15">故事十五：日常生活百态</a>
+  <button class="nav-toggle" onclick="toggleNav()">☰ 展开菜单</button>
+</nav>
+
+<main>
+
+<!-- ========================= STORY 1 ========================= -->
+<div class="story" id="story1">
+  <div class="story-header">
+    <h2>故事一：开学第一天</h2>
+    <div class="en-title">First Day of School</div>
+    <div class="meta">主题：校园生活 | 高亮颜色：<span style="color:#fbc02d">■ 黄色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Li Hua is an <span class="v v-yellow">ardent<span class="cn">(热情的)</span></span> student and the <span class="v v-yellow">incumbent<span class="cn">(现任的)</span></span> class president, making her classroom the <span class="v v-yellow">hub<span class="cn">(中心)</span></span> of school activities. She always carries a <span class="v v-yellow">portfolio<span class="cn">(文件夹)</span></span> of notes and a <span class="v v-yellow">brochure<span class="cn">(小册子)</span></span> about clubs. At first she worried the new teacher would be <span class="v v-yellow">arrogant<span class="cn">(傲慢的)</span></span>, but that was just a <span class="v v-yellow">stereotype<span class="cn">(刻板印象)</span></span> — he said <span class="v v-yellow">arithmetic<span class="cn">(算术)</span></span> is the <span class="v v-yellow">staple<span class="cn">(主要的)</span></span> foundation of math and <span class="v v-yellow">repetition<span class="cn">(重复)</span></span> is the best way to learn. During break, she bought <span class="v v-yellow">stationery<span class="cn">(文具)</span></span> and saw older students <span class="v v-yellow">intimidate<span class="cn">(恐吓)</span></span> a younger boy, which she thought was <span class="v v-yellow">shameful<span class="cn">(可耻的)</span></span> and an <span class="v v-yellow">insult<span class="cn">(侮辱)</span></span> to the school spirit. Her courage was <span class="v v-yellow">integral<span class="cn">(不可或缺的)</span></span> to school safety, and with each <span class="v v-yellow">increment<span class="cn">(增加)</span></span> of confidence she grew as a leader. The teacher's wisdom would <span class="v v-yellow">baffle<span class="cn">(使困惑)</span></span>d her at first, but his kindness was no mere <span class="v v-yellow">semblance<span class="cn">(表象)</span></span>. She used her <span class="v v-yellow">intelligence<span class="cn">(智力)</span></span> to give an <span class="v v-yellow">incisive<span class="cn">(精辟的)</span></span> speech at the class meeting.
+    </div>
+    <div class="para-cn">
+      李华是一个热情的学生，也是现任班长，她的教室是学校活动的中心。她总是带着一个文件夹和一本关于社团的小册子。起初她担心新老师会很傲慢，但这只是一种刻板印象——他说算术是数学的主要基础，重复是最好的学习方法。课间时，她去买文具，看到高年级学生恐吓一个低年级男孩，她觉得这是可耻的，是对学校精神的侮辱。她的勇气对校园安全是不可或缺的，随着信心的增加她成长为更好的领导者。老师的智慧一开始让她困惑，但他的善良不只是表象。她用自己的智力在班会上做了精辟的发言。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 2 ========================= -->
+<div class="story" id="story2">
+  <div class="story-header">
+    <h2>故事二：周末大扫除</h2>
+    <div class="en-title">The Weekend Cleanup</div>
+    <div class="meta">主题：家庭日常 | 高亮颜色：<span style="color:#4caf50">■ 绿色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Saturday morning was always <span class="v v-green">hectic<span class="cn">(忙乱的)</span></span> at Zhang's home — cleanup day! Dad was <span class="v v-green">steadfast<span class="cn">(坚定的)</span></span> and believed good <span class="v v-green">sanitation<span class="cn">(卫生)</span></span> was important for the family. Mom filled a bucket to the <span class="v v-green">brim<span class="cn">(边缘)</span></span> with soapy water and used a garden <span class="v v-green">hose<span class="cn">(软管)</span></span> to wash windows. Xiao Mei found old <span class="v v-green">starch<span class="cn">(淀粉)</span></span> powder, threw it in the <span class="v v-green">trash<span class="cn">(垃圾)</span></span>, and tried to <span class="v v-green">squash<span class="cn">(压扁)</span></span> it down, but the <span class="v v-green">brittle<span class="cn">(易碎的)</span></span> bag almost broke. The sink had <span class="v v-green">stagnant<span class="cn">(停滞的)</span></span> water that smelled bad, and the air felt <span class="v v-green">static<span class="cn">(静态的)</span></span> before she opened the window. Xiao Gang cleaned the bathroom until everything was <span class="v v-green">sterile<span class="cn">(无菌的)</span></span>, removing hair that started to <span class="v v-green">tangle<span class="cn">(缠结)</span></span> in the drain. He showed great <span class="v v-green">vigilance<span class="cn">(警惕)</span></span> checking every corner, then decided to <span class="v v-green">brew<span class="cn">(冲泡)</span></span> tea for everyone. The family kept the kitchen <span class="v v-green">sanitary<span class="cn">(卫生的)</span></span> so food would not <span class="v v-green">perish<span class="cn">(腐烂)</span></span> easily.
+    </div>
+    <div class="para-cn">
+      星期六早上在张家总是忙乱的——今天是大扫除日！爸爸很坚定，相信良好的卫生对家庭很重要。妈妈把水桶装到边缘装满肥皂水，用花园软管冲洗窗户。小梅发现一袋过期的淀粉，扔进垃圾里，试着把它压扁，但易碎的垃圾袋差点破掉。水槽里有发臭的停滞的水，打开窗户前空气感觉是静态的。小刚打扫浴室直到一切都无菌，清除了排水口开始缠结的头发。他表现出极大的警惕检查每个角落，然后决定为大家冲泡一杯茶。一家人保持厨房卫生，这样食物就不容易腐烂。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 3 ========================= -->
+<div class="story" id="story3">
+  <div class="story-header">
+    <h2>故事三：第一份实习</h2>
+    <div class="en-title">My First Internship</div>
+    <div class="meta">主题：职场新人 | 高亮颜色：<span style="color:#2196f3">■ 蓝色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      As a <span class="v v-blue">novice<span class="cn">(新手)</span></span> intern, Xiao Wang was ready to <span class="v v-blue">commence<span class="cn">(开始)</span></span> his <span class="v v-blue">inaugural<span class="cn">(首次的)</span></span> day at work. The company offered a generous <span class="v v-blue">incentive<span class="cn">(激励)</span></span> of bonuses and free meals, and from his window he could see the <span class="v v-blue">marine<span class="cn">(海洋的)</span></span> bay. The company passed new <span class="v v-blue">legislation<span class="cn">(法规)</span></span> about flexible hours, and his boss's <span class="v v-blue">inference<span class="cn">(推断)</span></span> was that Xiao Wang had <span class="v v-blue">legitimate<span class="cn">(合理的)</span></span> talent for creative work. Sometimes he had <span class="v v-blue">insomnia<span class="cn">(失眠)</span></span> from excitement, and his <span class="v v-blue">obsession<span class="cn">(痴迷)</span></span> with learning kept him up late. He found his own <span class="v v-blue">niche<span class="cn">(合适的位置)</span></span> and loved the <span class="v v-blue">linen<span class="cn">(亚麻的)</span></span> curtains and <span class="v v-blue">lime<span class="cn">(酸橙)</span></span> green walls. At lunch, he visited a nearby zoo and saw a <span class="v v-blue">kangaroo<span class="cn">(袋鼠)</span></span> and an <span class="v v-blue">ostrich<span class="cn">(鸵鸟)</span></span>. The <span class="v v-blue">lavish<span class="cn">(奢华的)</span></span> gift shop had a <span class="v v-blue">leopard<span class="cn">(豹子)</span></span> plushie. There was a public <span class="v v-blue">outcry<span class="cn">(强烈抗议)</span></span> about the zoo being too small, but the benefits <span class="v v-blue">outweigh<span class="cn">(超过)</span></span> the costs. The cafe served <span class="v v-blue">palatable<span class="cn">(可口的)</span></span> sandwiches and bone <span class="v v-blue">marrow<span class="cn">(骨髓)</span></span> soup. An old <span class="v v-blue">observatory<span class="cn">(天文台)</span></span> on a hill seemed to <span class="v v-blue">loom<span class="cn">(赫然耸现)</span></span> over the path. The guide gave a <span class="v v-blue">lucid<span class="cn">(清晰的)</span></span> explanation of telescopes, and he learned that volunteers are like <span class="v v-blue">martyr<span class="cn">(烈士)</span></span>s, while the zoo follows <span class="v v-blue">linear<span class="cn">(线性的)</span></span> welfare rules.
+    </div>
+    <div class="para-cn">
+      作为一名新手实习生，小王准备好开始他的首次工作日了。公司提供丰厚的激励——奖金和免费餐食，从靠窗的办公桌他可以看到海洋的海湾。公司通过了关于弹性工作时间的新法规，老板的推断是小王在创意工作方面有合理的天赋。有时他因为兴奋而失眠，对学习的痴迷让他熬夜。他找到了自己合适的位置，喜欢亚麻的窗帘和酸橙绿的墙壁。午休时，他去了附近的动物园，看到了一只袋鼠和一只鸵鸟。奢华的礼品店有一只豹子毛绒玩具。公众对动物园太小表示强烈抗议，但好处超过了成本。咖啡馆供应可口的三明治和骨髓汤。山上的古老天文台似乎赫然耸现在小路上。向导清晰地解释了望远镜，他了解到志愿者就像烈士，动物园遵循线性的福利规则。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 4 ========================= -->
+<div class="story" id="story4">
+  <div class="story-header">
+    <h2>故事四：郊外徒步</h2>
+    <div class="en-title">A Hike in the Countryside</div>
+    <div class="meta">主题：周末出游 | 高亮颜色：<span style="color:#9c27b0">■ 紫色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Last weekend, Xiao Lin and her friends went hiking in the countryside. They saw many <span class="v v-purple">aquatic<span class="cn">(水生的)</span></span> plants by a beautiful lake and spotted <span class="v v-purple">arboreal<span class="cn">(树栖的)</span></span> squirrels jumping in the trees. A guide said a <span class="v v-purple">carnivore<span class="cn">(食肉动物)</span></span> like a fox lives in these woods. Most animals here are not <span class="v v-purple">nocturnal<span class="cn">(夜间活动的)</span></span> — they are active during the day. Every <span class="v v-purple">predator<span class="cn">(捕食者)</span></span> plays an important role in nature, while rabbits and deer are common <span class="v v-purple">prey<span class="cn">(猎物)</span></span> for larger animals. They also saw a small <span class="v v-purple">reptile<span class="cn">(爬行动物)</span></span> — a lizard sunning on a rock. A mouse is a type of <span class="v v-purple">rodent<span class="cn">(啮齿动物)</span></span> that lives in fields, and a crow is a <span class="v v-purple">scavenger<span class="cn">(食腐动物)</span></span> that eats whatever it finds. The dense <span class="v v-purple">vegetation<span class="cn">(植被)</span></span> in the forest provides homes and food for all these creatures.
+    </div>
+    <div class="para-cn">
+      上周末，小林和朋友们去郊外徒步。他们看到一个美丽的湖边生长着许多水生的植物，还发现树栖的松鼠在树上跳来跳去。一位向导说，像狐狸这样的食肉动物生活在这片树林里。这里的大多数动物都不是夜间活动的——它们白天活动。每一个捕食者都在自然界中扮演着重要的角色，而兔子和鹿是大型动物常见的猎物。他们还看到了一只小型爬行动物——一只在岩石上晒太阳的蜥蜴。老鼠是一种生活在田野里的啮齿动物，乌鸦是一种食腐动物，吃它能找到的任何东西。森林里茂密的植被为所有这些生物提供了家园和食物。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 5 ========================= -->
+<div class="story" id="story5">
+  <div class="story-header">
+    <h2>故事五：超市大采购</h2>
+    <div class="en-title">A Day at the Supermarket</div>
+    <div class="meta">主题：购物日记 | 高亮颜色：<span style="color:#ff9800">■ 橙色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      On Saturday, Xiao Li went to the supermarket where ads would <span class="v v-orange">allude<span class="cn">(暗示)</span></span> to great deals as she liked to <span class="v v-orange">amble<span class="cn">(漫步)</span></span> through the aisles, spotting cookies <span class="v v-orange">Aloft<span class="cn">(在高处)</span></span> on the top shelf. The <span class="v v-orange">alpine<span class="cn">(高山的)</span></span> yogurt came from a farm at high <span class="v v-orange">altitude<span class="cn">(海拔)</span></span>, and the <span class="v v-orange">amenable<span class="cn">(通情达理的)</span></span> manager greeted everyone warmly. An old lady with <span class="v v-orange">amnesia<span class="cn">(健忘症)</span></span> who was <span class="v v-orange">bilingual<span class="cn">(双语的)</span></span> asked for help, and the fruit section had <span class="v v-orange">amber<span class="cn">(琥珀色的)</span></span> peaches and <span class="v v-orange">aluminum<span class="cn">(铝制的)</span></span> cans. An <span class="v v-orange">ambiguous<span class="cn">(模棱两可的)</span></span> price label was a <span class="v v-orange">blunder<span class="cn">(错误)</span></span> by the staff, and she felt <span class="v v-orange">ambivalent<span class="cn">(矛盾的)</span></span> about buying snacks. The bread section sold <span class="v v-orange">analogue<span class="cn">(类似物)</span></span>s of traditional cakes, and candy came in <span class="v v-orange">amorphous<span class="cn">(无定形的)</span></span> shapes that were truly <span class="v v-orange">bizarre<span class="cn">(奇异的)</span></span>. She liked studying the <span class="v v-orange">anatomy<span class="cn">(构造)</span></span> of fruits, heard <span class="v v-orange">anecdotal<span class="cn">(传闻的)</span></span> ghost stories, and saw a <span class="v v-orange">colossal<span class="cn">(巨大的)</span></span> display of <span class="v v-orange">bleach<span class="cn">(漂白剂)</span></span>. She bought a new <span class="v v-orange">blouse<span class="cn">(女式衬衫)</span></span>, the scale needed <span class="v v-orange">calibration<span class="cn">(校准)</span></span>, and outside a <span class="v v-orange">vendor<span class="cn">(小贩)</span></span> sold flowers while a <span class="v v-orange">pedestrian<span class="cn">(行人)</span></span> with a <span class="v v-orange">pendant<span class="cn">(吊坠)</span></span> walked by. Stealing is a <span class="v v-orange">sin<span class="cn">(罪过)</span></span>, and a <span class="v v-orange">sinister<span class="cn">(阴险的)</span></span> man made her uneasy. People say the old town was once full of <span class="v v-orange">anarchy<span class="cn">(无政府状态)</span></span>, the fire alarm sounded like a <span class="v v-orange">siren<span class="cn">(警报器)</span></span>, and without food people would die of <span class="v v-orange">starvation<span class="cn">(饥饿)</span></span>. The store had high <span class="v v-orange">stature<span class="cn">(声望)</span></span> and followed every local <span class="v v-orange">statute<span class="cn">(法规)</span></span>; long lines could <span class="v v-orange">torment<span class="cn">(折磨)</span></span> shoppers but self-checkout helps <span class="v v-orange">unravel<span class="cn">(解决)</span></span> the problem. A <span class="v v-orange">proponent<span class="cn">(支持者)</span></span> of healthy eating stood by the vegetables, the store had to <span class="v v-orange">purge<span class="cn">(清除)</span></span> old food weekly, and the jewelry counter had beautiful <span class="v v-orange">quartz<span class="cn">(石英)</span></span> stones. Theft was <span class="v v-orange">rampant<span class="cn">(猖獗的)</span></span> last year but cameras helped <span class="v v-orange">rectify<span class="cn">(纠正)</span></span> it, and during the economic <span class="v v-orange">upheaval<span class="cn">(动荡)</span></span> the store changed a lot. Fresh <span class="v v-orange">varnish<span class="cn">(清漆)</span></span> made floors shine, the manager worked to <span class="v v-orange">vindicate<span class="cn">(证明...正确)</span></span> his price cuts, and the pet section had books about <span class="v v-orange">viper<span class="cn">(毒蛇)</span></span> snakes. Business was at its <span class="v v-orange">zenith<span class="cn">(顶峰)</span></span> during holidays; the owner was a <span class="v v-orange">maverick<span class="cn">(特立独行者)</span></span> whose favorite <span class="v v-orange">maxim<span class="cn">(格言)</span></span> was "the customer is always right." Monthly <span class="v v-orange">Mediation<span class="cn">(调解)</span></span> occurred between staff and management, the history section had <span class="v v-orange">medieval<span class="cn">(中世纪的)</span></span> books, and some customers liked to <span class="v v-orange">meditate<span class="cn">(冥想)</span></span> in the quiet corner. Staff would <span class="v v-orange">nominate<span class="cn">(提名)</span></span> the best worker each month, the <span class="v v-orange">obstinate<span class="cn">(固执的)</span></span> bakery chef never changed recipes, and the flower shop had <span class="v v-orange">venomous<span class="cn">(有毒的)</span></span>-looking plants that were harmless.
+    </div>
+    <div class="para-cn">
+      星期六，小李去超市购物，广告会暗示有超值优惠，她喜欢在过道里漫步，在高处的顶层货架上发现了饼干。高山酸奶来自高海拔的农场，通情达理的店长热情地迎接顾客。一位患健忘症的双语老太太请求帮助，水果区有琥珀色的桃子和铝制的果汁罐。模棱两可的价格标签是员工的错误，她对买零食感到矛盾。面包区出售传统糕点的类似物，糖果有无定形的形状，看起来真的很奇异。她喜欢研究水果的构造，听到过传闻的鬼故事，还看到了一个巨大的漂白剂展示架。她买了一件新的女式衬衫，秤需要校准，外面一个小贩在卖花，一个戴着吊坠的行人走过。偷窃是罪过，一个阴险的男人让她不安。人们说老城区曾经充满无政府状态，火警听起来像警报器，没有食物人们会死于饥饿。这家店声望很高，遵守每项当地法规；长队会折磨购物者但自助结账有助于解决问题。一位健康饮食的支持者站在蔬菜旁，商店每周清除过期食品，珠宝柜台有美丽的石英。去年盗窃猖獗但摄像头帮助纠正了情况，经济动荡期间商店变化很大。新的清漆让地板闪亮，经理努力证明降价是正确的，宠物区有关于毒蛇的书。节日期间生意处于顶峰；店主是个特立独行者，最喜欢的格言是"顾客永远是对的"。每月员工和管理层之间有调解，历史区有中世纪的书，一些顾客喜欢在安静的角落冥想。员工每月提名最佳员工，固执的面包师从不改变食谱，花店有看起来有毒但其实无害的植物。
+    </div>
+  </div>
+</div>
+
+
+<!-- ========================= STORY 6 ========================= -->
+<div class="story" id="story6">
+  <div class="story-header">
+    <h2>故事六：学做蛋糕</h2>
+    <div class="en-title">Learning to Bake a Cake</div>
+    <div class="meta">主题：美食厨房 | 高亮颜色：<span style="color:#009688">■ 青色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Xiao Mei decided to learn baking at a cooking class. She mixed the <span class="v v-teal">batter<span class="cn">(面糊)</span></span> carefully until smooth, and the sweet smell seemed to <span class="v v-teal">beckon<span class="cn">(召唤)</span></span> her to the kitchen. She promised not to <span class="v v-teal">betray<span class="cn">(背叛)</span></span> the secret recipe, as they had a <span class="v v-teal">bilateral<span class="cn">(双边的)</span></span> agreement — no sharing with outsiders. The oven was hot with a small <span class="v v-teal">blaze<span class="cn">(火焰)</span></span> visible through the glass, and outside the weather was <span class="v v-teal">bleak<span class="cn">(荒凉的)</span></span> and rainy. She walked with <span class="v v-teal">brisk<span class="cn">(轻快的)</span></span> steps to fetch ingredients, and the cookie edges were <span class="v v-teal">brittle<span class="cn">(易碎的)</span></span> and crispy. A <span class="v v-teal">bulletin<span class="cn">(公告)</span></span> board showed class schedules, and she felt a small <span class="v v-teal">bump<span class="cn">(碰撞)</span></span> on her arm from carrying heavy bags. After class, she ate at the school <span class="v v-teal">cafeteria<span class="cn">(自助餐厅)</span></span>, where the meal had plenty of <span class="v v-teal">calcium<span class="cn">(钙)</span></span> from milk and cheese. She counted every <span class="v v-teal">calorie<span class="cn">(卡路里)</span></span> to stay healthy, and for dessert she had <span class="v v-teal">cane<span class="cn">(甘蔗)</span></span> sugar candy. The teacher gave her a vitamin <span class="v v-teal">capsule<span class="cn">(胶囊)</span></span> for energy, and said the <span class="v v-teal">cardinal<span class="cn">(主要的)</span></span> rule of baking is: always follow the recipe. A mother's gentle <span class="v v-teal">caress<span class="cn">(爱抚)</span></span> can calm a crying child, and Xiao Mei learned to <span class="v v-teal">carve<span class="cn">(雕刻)</span></span> beautiful patterns on cake frosting. The school was near a hotel with a <span class="v v-teal">casino<span class="cn">(赌场)</span></span>, and there was a small <span class="v v-teal">casualty<span class="cn">(事故)</span></span> in class — someone burned their finger. The teacher said curiosity is a <span class="v v-teal">catalyst<span class="cn">(催化剂)</span></span> for learning, older people sometimes develop <span class="v v-teal">cataract<span class="cn">(白内障)</span></span> and need surgery, and you must <span class="v v-teal">cease<span class="cn">(停止)</span></span> cooking at the right time. A famous <span class="v v-teal">celebrity<span class="cn">(名人)</span></span> chef visited last month, the kitchen floor was made of <span class="v v-teal">cement<span class="cn">(水泥)</span></span>, and on her way home she passed an old <span class="v v-teal">cemetery<span class="cn">(墓地)</span></span> with flowers. The government does a <span class="v v-teal">census<span class="cn">(人口普查)</span></span> every ten years, she bought <span class="v v-teal">ceramic<span class="cn">(陶瓷的)</span></span> bowls, ate <span class="v v-teal">cereal<span class="cn">(麦片)</span></span> for breakfast, and the school held a <span class="v v-teal">ceremonial<span class="cn">(仪式的)</span></span> graduation.
+    </div>
+    <div class="para-cn">
+      小美决定在烹饪班学烘焙。她仔细搅拌面糊直到顺滑，甜美的香味似乎在召唤她走进厨房。她答应不背叛老师分享的秘密食谱，因为他们有双边的协议——不向外人透露。烤箱很热，透过玻璃可以看到一小簇火焰，外面天气荒凉又下雨。她迈着轻快的步子去拿食材，饼干边缘易碎又酥脆。公告板上展示着课程表，她因提重物感到手臂上有一个小碰撞肿块。下课后她在学校自助餐厅吃饭，这顿饭从牛奶和奶酪中获得了充足的钙。她计算每一卡路里来保持健康，甜点吃了甘蔗糖做的糖果。老师给了她一粒维生素胶囊补充能量，说烘焙的主要规则是：永远按食谱来。母亲温柔的爱抚能让哭泣的孩子平静，小美学会了在蛋糕糖霜上雕刻美丽图案。学校附近有一家带赌场的酒店，课堂上发生了一起小事故——有人烫伤了手指。老师说好奇心是学习新技能的催化剂，老年人有时会患白内障需要手术，你必须在合适的时间停止烹饪。上个月一位著名的名人厨师来访，厨房地板是水泥做的，回家路上她经过一个古老的墓地。政府每十年做一次人口普查，她买了陶瓷的碗，早餐吃了麦片，学校举行了仪式的毕业典礼。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 7 ========================= -->
+<div class="story" id="story7">
+  <div class="story-header">
+    <h2>故事七：健身房的一天</h2>
+    <div class="en-title">A Day at the Gym</div>
+    <div class="meta">主题：健康生活 | 高亮颜色：<span style="color:#f44336">■ 红色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Xiao Chen joined a gym to get in shape, and today was his first day. He was <span class="v v-red">agile<span class="cn">(敏捷的)</span></span> and moved quickly between machines, but after running he felt the <span class="v v-red">agony<span class="cn">(痛苦)</span></span> of sore muscles. The gym felt <span class="v v-red">alien<span class="cn">(外星人/陌生的)</span></span> at first, and he had an <span class="v v-red">allergy<span class="cn">(过敏)</span></span> to the cleaning products. A trainer helped him <span class="v v-red">ascertain<span class="cn">(查明)</span></span> his fitness level, but all the equipment <span class="v v-red">bewilder<span class="cn">(使困惑)</span></span>ed him. He read a health <span class="v v-red">column<span class="cn">(专栏)</span></span> by a famous <span class="v v-red">columnist<span class="cn">(专栏作家)</span></span>, and the gym hung a poster to <span class="v v-red">commemorate<span class="cn">(纪念)</span></span> its anniversary. The TV played sports <span class="v v-red">commentary<span class="cn">(评论)</span></span> while people exercised, and the trainer gave <span class="v v-red">definitive<span class="cn">(确定的)</span></span> advice. He drank water so he would not <span class="v v-red">dehydrate<span class="cn">(脱水)</span></span>, and the humble trainer would never <span class="v v-red">deign<span class="cn">(屈尊)</span></span> to look down on beginners. The gym had a program to prevent youth <span class="v v-red">delinquency<span class="cn">(不良行为)</span></span>, and after heavy rain there was a <span class="v v-red">deluge<span class="cn">(洪水)</span></span> in the parking lot. The gym studied <span class="v v-red">demographic<span class="cn">(人口的)</span></span> data to understand members, and he learned to <span class="v v-red">detach<span class="cn">(分开)</span></span> his mind from tiredness. He faced a <span class="v v-red">dilemma<span class="cn">(困境)</span></span> — lift more weights or do more cardio? The joy of finishing is <span class="v v-red">ephemeral<span class="cn">(短暂的)</span></span>, and small injuries can <span class="v v-red">escalate<span class="cn">(升级)</span></span> into big problems. He asked a staff member to <span class="v v-red">fetch<span class="cn">(取来)</span></span> him a towel, a snow <span class="v v-red">flake<span class="cn">(薄片)</span></span> drifted past the window, and he heard about a membership <span class="v v-red">fraud<span class="cn">(欺诈)</span></span> scam. The gym offered physical <span class="v v-red">rehabilitation<span class="cn">(康复)</span></span> programs, the trainer was <span class="v v-red">relentless<span class="cn">(无情的)</span></span> and never let anyone give up, and after a swim his hair was <span class="v v-red">saturate<span class="cn">(浸透)</span></span>d with water. The gym used <span class="v v-red">semiconductor<span class="cn">(半导体)</span></span> technology in smart equipment, public <span class="v v-red">sentiment<span class="cn">(情绪)</span></span> was very positive, and he saw a man <span class="v v-red">tumble<span class="cn">(跌倒)</span></span> on the treadmill. The gym warned about <span class="v v-red">ultraviolet<span class="cn">(紫外线的)</span></span> rays from tanning beds, he was <span class="v v-red">unaffected<span class="cn">(不受影响的)</span></span> by the loud music, and efficient <span class="v v-red">utilisation<span class="cn">(利用)</span></span> of equipment saved time. He treated every workout with <span class="v v-red">utmost<span class="cn">(极度的)</span></span> care, it was <span class="v v-red">utter<span class="cn">(完全的)</span></span> silence in the yoga room, and the water fountain had a special <span class="v v-red">valve<span class="cn">(阀门)</span></span>. After exercise, tiredness seemed to <span class="v v-red">vanish<span class="cn">(消失)</span></span>, and he was determined to <span class="v v-red">vanquish<span class="cn">(征服)</span></span> his bad habits. He bought <span class="v v-red">velvet<span class="cn">(天鹅绒)</span></span> yoga pants, his friend sought <span class="v v-red">vengeance<span class="cn">(复仇)</span></span> on the scale by losing weight, and the piano teacher at the community center was a <span class="v v-red">virtuoso<span class="cn">(大师)</span></span>. The gym was an <span class="v v-red">affiliate<span class="cn">(附属)</span></span> of a national chain, he gave himself words of <span class="v v-red">affirmation<span class="cn">(肯定)</span></span> every morning, and most members came from <span class="v v-red">affluent<span class="cn">(富裕的)</span></span> neighborhoods. The gym was like a <span class="v v-red">beacon<span class="cn">(灯塔)</span></span> of health, and on his way out he dropped a <span class="v v-red">bead<span class="cn">(珠子)</span></span> from his bracelet but found it quickly.
+    </div>
+    <div class="para-cn">
+      小陈加入健身房来健身，今天是他第一天。他很敏捷，在器械之间快速移动，但跑步后感到肌肉酸痛的痛苦。健身房一开始很陌生，他对清洁产品过敏。教练帮他查明健身水平，但所有器械都让他困惑。他读了一位著名专栏作家写的健康专栏，健身房挂了海报纪念周年。电视播放着体育评论，教练给出确定的建议。他喝水以免脱水，谦虚的教练绝不会屈尊看不起初学者。健身房有预防青少年不良行为的项目，大雨后停车场有洪水。健身房研究人口数据来了解会员，他学会把思想从疲惫中分开。他面临困境——多举重还是多做有氧？完成的喜悦是短暂的，小伤可能升级成大问题。他让工作人员取来毛巾，一片雪花飘过窗外，他听说了会员欺诈骗局。健身房提供物理康复项目，教练很无情从不让任何人放弃，游泳后头发被水浸透。健身房在智能设备中使用半导体技术，公众情绪非常积极，他看到一个男人在跑步机上跌倒。健身房警告日光浴床发出紫外线，他不受嘈杂音乐影响，高效利用器械节省时间。他以极度认真对待每次锻炼，瑜伽室里是完全的寂静，饮水机有特殊阀门。运动后疲惫似乎消失了，他决心征服坏习惯。他买了天鹅绒瑜伽裤，朋友通过减重来向体重秤复仇，社区中心钢琴老师是大师。健身房是全国连锁的附属店，他每天早上给自己肯定的话语，大多数会员来自富裕的社区。健身房像健康的灯塔，出门时他从手链上掉了一颗珠子但很快找到了。
+    </div>
+  </div>
+</div>
+
+
+<!-- ========================= STORY 8 ========================= -->
+<div class="story" id="story8">
+  <div class="story-header">
+    <h2>故事八：智能家居</h2>
+    <div class="en-title">My Smart Home</div>
+    <div class="meta">主题：科技日常 | 高亮颜色：<span style="color:#00bcd4">■ 青蓝色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Xiao Zhao just moved into a new smart home full of amazing technology. Every room had a clever <span class="v v-cyan">gadget<span class="cn">(小器械)</span></span> that made life easier, and he walked with a confident <span class="v v-cyan">gait<span class="cn">(步态)</span></span> proud of his new home. His smart speaker could tell you about every <span class="v v-cyan">galaxy<span class="cn">(星系)</span></span> in space, and he had the <span class="v v-cyan">gall<span class="cn">(胆量)</span></span> to try every feature on the first day. He even wore futuristic <span class="v v-cyan">garb<span class="cn">(装束)</span></span> — a smart watch and wireless earbuds, and the kitchen counter was made of <span class="v v-cyan">granite<span class="cn">(花岗岩)</span></span>. The system was built from <span class="v v-cyan">grass-roots<span class="cn">(基层的)</span></span> ideas from ordinary people, and a <span class="v v-cyan">grid<span class="cn">(网格)</span></span> of sensors covered every room. The door <span class="v v-cyan">hinge<span class="cn">(铰链)</span></span> was automatic, smart devices continue to <span class="v v-cyan">proliferate<span class="cn">(激增)</span></span>, and the AI assistant could <span class="v v-cyan">quell<span class="cn">(平息)</span></span> your worries by answering questions. A cold drink from the smart fridge helped <span class="v v-cyan">quench<span class="cn">(解渴)</span></span> his thirst, and all devices came with a <span class="v v-cyan">refundable<span class="cn">(可退款的)</span></span> warranty. You can <span class="v v-cyan">refute<span class="cn">(反驳)</span></span> the idea that smart homes are unsafe, and <span class="v v-cyan">Regardless<span class="cn">(不管)</span></span> of how busy you are, a smart home saves time. A <span class="v v-cyan">heap<span class="cn">(堆)</span></span> of packages arrived on moving day, and movers had to <span class="v v-cyan">heave<span class="cn">(用力举起)</span></span> the heavy sofa up the stairs. Making <span class="v v-cyan">indecent<span class="cn">(不得体的)</span></span> jokes near the smart speaker is not polite, the main <span class="v v-cyan">artery<span class="cn">(动脉/要道)</span></span> of the house was the hallway, and the smart TV played <span class="v v-cyan">hilarious<span class="cn">(欢闹的)</span></span> shows. There was an <span class="v v-cyan">indefinite<span class="cn">(不确定的)</span></span> delay in internet service, home insurance provides <span class="v v-cyan">indemnity<span class="cn">(赔偿)</span></span> if something gets damaged, and a full battery is <span class="v v-cyan">indicative<span class="cn">(预示的)</span></span> of a well-charged device. Eating too much fast food gave him <span class="v v-cyan">indigestion<span class="cn">(消化不良)</span></span>, he worried about <span class="v v-cyan">inflation<span class="cn">(通货膨胀)</span></span> making things expensive, and the designer was <span class="v v-cyan">ingenious<span class="cn">(机灵的)</span></span>. Every <span class="v v-cyan">inhabitant<span class="cn">(居民)</span></span> loved the smart features, but bad weather could <span class="v v-cyan">inhibit<span class="cn">(抑制)</span></span> the sensors from working properly.
+    </div>
+    <div class="para-cn">
+      小赵刚搬进充满科技的新智能家居。每个房间都有聪明的小器械让生活更轻松，他迈着自信的步态为新家感到自豪。智能音箱可以告诉你太空中每个星系的知识，他有胆量在第一天就尝试每个功能。他甚至穿着未来感的装束——智能手表和无线耳机，厨房台面是花岗岩做的。系统建立在普通人的基层想法上，传感器网格覆盖每个房间。门的铰链是自动的，智能设备继续激增，AI助手可以通过回答问题来平息你的担忧。智能冰箱的冷饮帮助他解渴，所有设备都有可退款的保修。你可以反驳智能家居不安全的说法，不管你有多忙，智能家居都能节省时间。搬家那天一大堆包裹到了，搬家工人得用力举起沉重的沙发上楼。在智能音箱前开不得体的玩笑不礼貌，走廊是房子的主要要道，智能电视播放欢闹的节目。网络服务有不确定的延迟，家庭保险在东西损坏时提供赔偿，满格电池预示着设备充好了电。吃太多快餐让他消化不良，他担心通货膨胀让东西变贵，设计师很机灵。每个居民都喜欢智能功能，但恶劣天气可能抑制传感器正常工作。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 9 ========================= -->
+<div class="story" id="story9">
+  <div class="story-header">
+    <h2>故事九：生日派对</h2>
+    <div class="en-title">The Birthday Party</div>
+    <div class="meta">主题：朋友聚会 | 高亮颜色：<span style="color:#e91e63">■ 粉色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Last Saturday was Xiao Yu's birthday — her friends organized a surprise party. She had an <span class="v v-pink">innate<span class="cn">(天生的)</span></span> talent for joy, and her greatest <span class="v v-pink">aspiration<span class="cn">(抱负)</span></span> was to make everyone feel welcome. Her parents had a <span class="v v-pink">mortgage<span class="cn">(按揭)</span></span> on the apartment but let her use the <span class="v v-pink">loft<span class="cn">(阁楼)</span></span> with its <span class="v v-pink">dome<span class="cn">(圆屋顶)</span></span>-shaped ceiling, <span class="v v-pink">lotus<span class="cn">(荷花)</span></span> flowers, and <span class="v v-pink">dolphin<span class="cn">(海豚)</span></span>-shaped balloons as the party <span class="v v-pink">domain<span class="cn">(领域)</span></span>. Her whole <span class="v v-pink">clan<span class="cn">(家族)</span></span> came, and a friend gave a long <span class="v v-pink">monologue<span class="cn">(独白)</span></span> praising her <span class="v v-pink">clarity<span class="cn">(清晰)</span></span> of thought and <span class="v v-pink">clement<span class="cn">(仁慈的)</span></span> nature. A <span class="v v-pink">doleful<span class="cn">(悲哀的)</span></span> song was sung as a joke, a hilarious <span class="v v-pink">imitation<span class="cn">(模仿)</span></span> of the teacher made everyone laugh, and someone said the food was <span class="v v-pink">atrocious<span class="cn">(糟透的)</span></span> — all in good fun. People dared each other to <span class="v v-pink">gobble<span class="cn">(狼吞虎咽)</span></span> whole <span class="v v-pink">lobster<span class="cn">(龙虾)</span></span>s, they would <span class="v v-pink">immerse<span class="cn">(沉浸)</span></span> themselves in games, and everyone felt <span class="v v-pink">immune<span class="cn">(免疫的)</span></span> to life's worries. Planning was <span class="v v-pink">demanding<span class="cn">(要求高的)</span></span> — the <span class="v v-pink">logistics<span class="cn">(后勤)</span></span> were complex, friends <span class="v v-pink">donate<span class="cn">(捐赠)</span></span>d money and time, and their <span class="v v-pink">instrumental<span class="cn">(起作用的)</span></span> support made it possible. The experience was <span class="v v-pink">instructive<span class="cn">(有益的)</span></span>, the <span class="v v-pink">instantaneous<span class="cn">(瞬间的)</span></span> "surprise" <span class="v v-pink">stun<span class="cn">(使震惊)</span></span>ned her, and they paid in monthly <span class="v v-pink">instalment<span class="cn">(分期付款)</span></span>s. People said it was <span class="v v-pink">insane<span class="cn">(疯狂的)</span></span> how much fun it was, and they would <span class="v v-pink">lament<span class="cn">(痛惜)</span></span> when it ended. A <span class="v v-pink">landslide<span class="cn">(山崩)</span></span> of gifts arrived, a small <span class="v v-pink">lapse<span class="cn">(小错)</span></span> in planning caused a food shortage, and when a guest spilled juice there was no <span class="v v-pink">retaliation<span class="cn">(报复)</span></span> — everyone laughed. Xiao Yu refused to <span class="v v-pink">delude<span class="cn">(欺骗)</span></span> herself; the city planned to <span class="v v-pink">demolish<span class="cn">(拆毁)</span></span> the old building but she was in <span class="v v-pink">denial<span class="cn">(否认)</span></span>. Red balloons <span class="v v-pink">denote<span class="cn">(表示)</span></span> celebration, stealing is <span class="v v-pink">immoral<span class="cn">(不道德的)</span></span>, and they used foam walls to <span class="v v-pink">insulate<span class="cn">(隔离)</span></span> the sound. A tiny <span class="v v-pink">locomotive<span class="cn">(火车头)</span></span> toy went around the table, out-of-town friends decided to <span class="v v-pink">lodge<span class="cn">(暂住)</span></span> at a hotel, and the <span class="v v-pink">magnetic<span class="cn">(有磁性的)</span></span> photo booth was popular. Smartphones were <span class="v v-pink">ubiquitous<span class="cn">(无处不在的)</span></span>, an <span class="v v-pink">ultrasonic<span class="cn">(超声波的)</span></span> humidifier kept air fresh, and why it was so fun was <span class="v v-pink">unaccountable<span class="cn">(无法解释的)</span></span>. Winning felt like a <span class="v v-pink">windfall<span class="cn">(意外之财)</span></span> of joy, flowers would <span class="v v-pink">wither<span class="cn">(凋谢)</span></span> quickly, and she tried to <span class="v v-pink">withhold<span class="cn">(隐瞒)</span></span> her tears. She knew she could <span class="v v-pink">withstand<span class="cn">(经受住)</span></span> any hard times, so after dinner they went for a <span class="v v-pink">stroll<span class="cn">(漫步)</span></span> in the park. The joy was <span class="v v-pink">fleeting<span class="cn">(短暂的)</span></span> but precious, like the <span class="v v-pink">flux<span class="cn">(变迁)</span></span> of fashion, and rain was <span class="v v-pink">foil<span class="cn">(挫败)</span></span>ed by their umbrellas — good <span class="v v-pink">foresight<span class="cn">(远见)</span></span>! Cheaters would <span class="v v-pink">forfeit<span class="cn">(丧失)</span></span> the game, Xiao Yu promised never to <span class="v v-pink">forsake<span class="cn">(放弃)</span></span> her true friends, and they hiked to a deep <span class="v v-pink">gorge<span class="cn">(峡谷)</span></span> nearby and saw a <span class="v v-pink">gorilla<span class="cn">(大猩猩)</span></span> statue at the zoo. People loved to <span class="v v-pink">gossip<span class="cn">(闲聊)</span></span> about who liked whom, she felt deep <span class="v v-pink">gratitude<span class="cn">(感激)</span></span> for everyone, and the kitchen was full of <span class="v v-pink">grease<span class="cn">(油脂)</span></span> from cooking. They had to <span class="v v-pink">haul<span class="cn">(拖)</span></span> heavy boxes upstairs, the storm caused <span class="v v-pink">havoc<span class="cn">(大灾难)</span></span> outside, and a light <span class="v v-pink">haze<span class="cn">(薄雾)</span></span> of incense filled the room. The party had no strict <span class="v v-pink">hierarchy<span class="cn">(等级制度)</span></span>, terrorists tried to <span class="v v-pink">hijack<span class="cn">(劫持)</span></span> the playlist but failed, and after the party they went for a <span class="v v-pink">hike<span class="cn">(远足)</span></span> in the hills. The old birthday song is a <span class="v v-pink">cliché<span class="cn">(陈词滥调)</span></span>, they watched the sunset from a <span class="v v-pink">cliff<span class="cn">(悬崖)</span></span> near the park, and a <span class="v v-pink">clumsy<span class="cn">(笨拙的)</span></span> guest tripped over a chair but was okay.
+    </div>
+    <div class="para-cn">
+      上周六是小雨的生日——朋友们组织了惊喜派对。她有天生的制造快乐的天赋，最大的抱负是让每个人都感到受欢迎。她的父母有公寓的按揭，但让她使用带圆屋顶天花板、荷花和海豚形状气球的阁楼作为派对领域。她的整个家族都来了，一位朋友发表了长篇独白，称赞她清晰的思维和仁慈的性格。有人开玩笑地唱了一首悲哀的歌，对老师的滑稽模仿让每个人都笑了，有人说食物糟透了——都是闹着玩的。人们互相挑战一口狼吞虎咽掉整只龙虾，他们沉浸在游戏中，每个人都觉得对生活烦恼免疫。策划要求很高——后勤很复杂，朋友们捐赠了钱和时间，他们起作用的支持让一切成为可能。这次经历是有益的，瞬间的"惊喜"让她震惊，派对用品他们按月分期付款。人们说好玩得简直疯狂，派对结束时他们会痛惜。一大堆礼物山崩一样涌来，计划中的一个小错导致食物短缺，客人打翻果汁时没有报复——大家都笑了。小雨拒绝欺骗自己；城市计划拆毁老建筑但她表示否认。红色气球表示庆祝，偷窃是不道德的，他们用泡沫墙隔离声音。一个小小的火车头玩具绕着桌子跑，外地朋友决定在旅馆暂住，有磁性的拍照亭很受欢迎。智能手机无处不在，超声波加湿器保持空气清新，为什么这么好玩是无法解释的。赢了感觉像一笔快乐的意外之财，花会很快凋谢，她试图隐瞒幸福的泪水。她知道她能经受住任何困难时期，晚饭后他们去公园漫步。快乐是短暂的但珍贵的，就像时尚的变迁，雨被他们的伞挫败了——好远见！作弊者会丧失比赛资格，小雨承诺永不放弃真正的朋友，他们远足到附近深深的峡谷，在动物园看到了大猩猩雕像。人们喜欢闲聊谁喜欢谁，她对每个人深感感激，厨房里满是烹饪留下的油脂。他们不得不把重箱子拖上楼，暴风雨在外面造成大灾难，一层薄薄的香雾充满房间。派对没有严格的等级制度，恐怖分子试图劫持播放列表但失败了，派对后他们去山上远足。古老的生日歌是陈词滥调，他们从公园附近的悬崖看日落，一个笨拙的客人被椅子绊倒但没事。
+    </div>
+  </div>
+</div>
+
+
+<!-- ========================= STORY 10 ========================= -->
+<div class="story" id="story10">
+  <div class="story-header">
+    <h2>故事十：小区的夏天</h2>
+    <div class="en-title">Summer in Our Community</div>
+    <div class="meta">主题：社区生活 | 高亮颜色：<span style="color:#795548">■ 棕色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Summer in the neighborhood was always nice and full of life. The small lake had many <span class="v v-brown">aquatic<span class="cn">(水生的)</span></span> plants and colorful fish, and squirrels are <span class="v v-brown">arboreal<span class="cn">(树栖的)</span></span> animals that live in the big oak trees. A stray cat, a small <span class="v v-brown">carnivore<span class="cn">(食肉动物)</span></span>, hunted mice in the garden, and owls are <span class="v v-brown">nocturnal<span class="cn">(夜间活动的)</span></span> — they sleep during the day. Every <span class="v v-brown">predator<span class="cn">(捕食者)</span></span> in the area kept the natural balance healthy, rabbits were common <span class="v v-brown">prey<span class="cn">(猎物)</span></span> for foxes, and a small <span class="v v-brown">reptile<span class="cn">(爬行动物)</span></span> lived near the stone wall. A mouse is a type of <span class="v v-brown">rodent<span class="cn">(啮齿动物)</span></span> that sometimes gets into homes, a crow is a <span class="v v-brown">scavenger<span class="cn">(食腐动物)</span></span> that eats whatever it finds, and the thick <span class="v v-brown">vegetation<span class="cn">(植被)</span></span> in the park made it feel like a small forest. The community center was the <span class="v v-brown">hub<span class="cn">(中心)</span></span> of all activities, run by an <span class="v v-brown">ardent<span class="cn">(热情的)</span></span> group of volunteers. The <span class="v v-brown">incumbent<span class="cn">(现任的)</span></span> head of the community carried a <span class="v v-brown">portfolio<span class="cn">(文件夹)</span></span> of papers and a <span class="v v-brown">brochure<span class="cn">(小册子)</span></span> about summer events. At first some thought she was <span class="v v-brown">arrogant<span class="cn">(傲慢的)</span></span>, but that was just a <span class="v v-brown">stereotype<span class="cn">(刻板印象)</span></span> — she was actually very warm. She taught kids basic <span class="v v-brown">arithmetic<span class="cn">(算术)</span></span> as the <span class="v v-brown">staple<span class="cn">(主要的)</span></span> part of summer school, and learning through <span class="v v-brown">repetition<span class="cn">(重复)</span></span> helped kids remember. The community shop sold cheap <span class="v v-brown">stationery<span class="cn">(文具)</span></span> for students, and she would not let older kids <span class="v v-brown">intimidate<span class="cn">(恐吓)</span></span> younger ones — that was a <span class="v v-brown">shameful<span class="cn">(可耻的)</span></span> thing to do. She said bullying was an <span class="v v-brown">insult<span class="cn">(侮辱)</span></span> to the community spirit.
+    </div>
+    <div class="para-cn">
+      小区的夏天总是很美好，充满生机。小湖里有许多水生的植物和五颜六色的鱼，松鼠是树栖的动物，生活在高大的橡树上。一只流浪猫是小型食肉动物，在花园里捕老鼠，猫头鹰是夜间活动的——它们白天睡觉。该地区的每一个捕食者都保持着自然平衡的健康，兔子是狐狸常见的猎物，一只小型爬行动物住在石墙附近。老鼠是一种啮齿动物，有时会进入家里，乌鸦是一种食腐动物，吃它能找到的任何东西，公园里茂密的植被让人感觉像一个小森林。社区中心是所有活动的中心，由一群热情的志愿者运营。社区的现任负责人带着一个文件夹和一本关于暑期活动的小册子。起初有些人以为她很傲慢，但那只是一种刻板印象——她其实非常热情。她教孩子们基础算术，作为暑期学校的主要部分，通过重复学习帮助孩子们记住东西。社区商店为学生出售便宜的文具，她不允许大孩子恐吓小孩子——那样做是可耻的。她说霸凌是对社区精神的侮辱。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 11 ========================= -->
+<div class="story" id="story11">
+  <div class="story-header">
+    <h2>故事十一：备考的日子</h2>
+    <div class="en-title">Days of Exam Preparation</div>
+    <div class="meta">主题：学习成长 | 高亮颜色：<span style="color:#f9a825">■ 金色</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      Xiao Ming was preparing for the college entrance exam. As a <span class="v v-gold">novice<span class="cn">(新手)</span></span> at big exams, he was <span class="v v-gold">diligent<span class="cn">(勤勉的)</span></span> and <span class="v v-gold">meticulous<span class="cn">(细致的)</span></span> in his studies. His desk was in the <span class="v v-gold">loft<span class="cn">(阁楼)</span></span> — quiet and <span class="v v-gold">spacious<span class="cn">(宽敞的)</span></span>, and he made a <span class="v v-gold">pledge<span class="cn">(承诺)</span></span> to work hard using a special <span class="v v-gold">methodology<span class="cn">(方法论)</span></span>. The city view outside was <span class="v v-gold">vibrant<span class="cn">(生机勃勃的)</span></span> and he felt <span class="v v-gold">resilient<span class="cn">(有韧性的)</span></span> even on tough days. In history class, he learned about the <span class="v v-gold">renaissance<span class="cn">(复兴)</span></span> — a time of <span class="v v-gold">magnificent<span class="cn">(壮丽的)</span></span> art and great thinkers. Great leaders showed <span class="v v-gold">foresight<span class="cn">(远见)</span></span>, and he loved the <span class="v v-gold">brevity<span class="cn">(简洁)</span></span> of ancient poems and admired <span class="v v-gold">candid<span class="cn">(率直的)</span></span> writers. The <span class="v v-gold">poignant<span class="cn">(深刻的)</span></span> emotion in good literature touched him, and he enjoyed <span class="v v-gold">animated<span class="cn">(活泼的)</span></span> class discussions. In science, he learned about the <span class="v v-gold">spectrum<span class="cn">(光谱)</span></span> of light and our <span class="v v-gold">galaxy<span class="cn">(星系)</span></span>, the Milky Way. He dreamed of becoming a <span class="v v-gold">stellar<span class="cn">(一流的)</span></span> scientist, studied how plants release <span class="v v-gold">pollen<span class="cn">(花粉)</span></span> and nature's amazing <span class="v v-gold">adaptation<span class="cn">(适应)</span></span> to different environments. Some animals have <span class="v v-gold">innate<span class="cn">(天生的)</span></span> abilities that help them survive. In chemistry, he learned about <span class="v v-gold">solvent<span class="cn">(溶剂)</span></span>s and <span class="v v-gold">noxious<span class="cn">(有害的)</span></span> gases, and how the <span class="v v-gold">immune<span class="cn">(免疫的)</span></span> system fights disease. Sometimes his scores hit a <span class="v v-gold">plateau<span class="cn">(平稳期)</span></span>, but he knew progress is not always <span class="v v-gold">linear<span class="cn">(线性的)</span></span>. He tried new methods to <span class="v v-gold">stabilise<span class="cn">(使稳定)</span></span> his grades and used <span class="v v-gold">qualitative<span class="cn">(定性的)</span></span> analysis to understand mistakes. He wanted to <span class="v v-gold">qualify<span class="cn">(有资格)</span></span> for the best university, and break time felt <span class="v v-gold">ephemeral<span class="cn">(短暂的)</span></span> but precious. He felt <span class="v v-gold">abashed<span class="cn">(窘迫的)</span></span> thinking about how much he still had to learn, stress sometimes caused <span class="v v-gold">indigestion<span class="cn">(消化不良)</span></span>, and the <span class="v v-gold">distress<span class="cn">(痛苦)</span></span> of exam pressure was hard to bear. His mom would <span class="v v-gold">soothe<span class="cn">(安慰)</span></span> him with warm soup and kind words. He refused to let <span class="v v-gold">apathy<span class="cn">(冷漠)</span></span> take over and would never <span class="v v-gold">forsake<span class="cn">(放弃)</span></span> his dreams or let his spirit <span class="v v-gold">wither<span class="cn">(凋谢)</span></span>. He knew stress could <span class="v v-gold">inhibit<span class="cn">(抑制)</span></span> clear thinking, smartphones have become <span class="v v-gold">ubiquitous<span class="cn">(无处不在的)</span></span>, and he learned about <span class="v v-gold">inflation<span class="cn">(通货膨胀)</span></span> and the simple <span class="v v-gold">hierarchy<span class="cn">(等级制度)</span></span> of the school system. He was <span class="v v-gold">ingenious<span class="cn">(机灵的)</span></span> at finding new ways to solve problems, and there was often a <span class="v v-gold">discrepancy<span class="cn">(差异)</span></span> between his practice and real exam scores. After long study sessions, he liked to walk in the <span class="v v-gold">tranquil<span class="cn">(宁静的)</span></span> park nearby. The museum had <span class="v v-gold">fossil<span class="cn">(化石)</span></span> exhibits, he loved eating <span class="v v-gold">lobster<span class="cn">(龙虾)</span></span> on hot days, and he watched <span class="v v-gold">dolphin<span class="cn">(海豚)</span></span> shows on TV. He visited grandma in a village — her house had a <span class="v v-gold">dome<span class="cn">(圆屋顶)</span></span>-shaped roof and <span class="v v-gold">lotus<span class="cn">(荷花)</span></span> flowers in the pond. He read about a <span class="v v-gold">veteran<span class="cn">(老兵)</span></span> soldier who was a <span class="v v-gold">visionary<span class="cn">(有远见的)</span></span> leader — people <span class="v v-gold">venerate<span class="cn">(崇敬)</span></span>d him as a hero. He learned that small problems can <span class="v v-gold">escalate<span class="cn">(升级)</span></span> if not dealt with early, new inventions <span class="v v-gold">proliferate<span class="cn">(激增)</span></span> every year, and he liked small <span class="v v-gold">gadget<span class="cn">(小器械)</span></span>s with <span class="v v-gold">magnetic<span class="cn">(有磁性的)</span></span> parts. <span class="v v-gold">Insulate<span class="cn">(绝缘的)</span></span>d wires keep electricity safe, he often faced a <span class="v v-gold">dilemma<span class="cn">(困境)</span></span> — study math or English first, and hard work <span class="v v-gold">constitute<span class="cn">(构成)</span></span>s the key to success. Every <span class="v v-gold">facet<span class="cn">(方面)</span></span> of learning interested him, human <span class="v v-gold">frailty<span class="cn">(脆弱)</span></span> means everyone makes mistakes, and <span class="v v-gold">Sporadic<span class="cn">(零星的)</span></span> rain showers sometimes interrupted his study. He was determined to <span class="v v-gold">rectify<span class="cn">(纠正)</span></span> his weak subjects and would <span class="v v-gold">meditate<span class="cn">(冥想)</span></span> for ten minutes daily to relax his mind.
+    </div>
+    <div class="para-cn">
+      小明正在为高考做准备。作为大型考试的新手，他在学习上既勤勉又细致。他的书桌在阁楼上——安静而宽敞，他许下了努力学习的承诺，使用一套特殊的方法论。外面的城市景色生机勃勃，即使在困难的日子里他也感到有韧性。在历史课上，他了解了文艺复兴——一个壮丽的艺术和伟大思想家的时代。伟大的领导人展现出远见，他喜欢古诗的简洁，欣赏率直的作家。好的文学作品中深刻的情感打动了他，他喜欢活泼的课堂讨论。在科学课上，他学习了光的光谱和我们的星系——银河系。他梦想成为一流的科学家，研究了植物如何释放花粉以及大自然对不同环境的惊人适应。有些动物拥有天生的能力来帮助生存。在化学中，他学习了溶剂和有害气体，以及免疫系统如何对抗疾病。有时他的分数进入平稳期，但他知道进步不总是线性的。他尝试新方法来稳定成绩，用定性分析理解错误。他想获得最好大学的资格，休息时间虽然短暂但很珍贵。想到还有那么多要学他感到窘迫，压力有时导致消化不良，考试压力的痛苦很难承受。妈妈会用热汤和亲切的话语安慰他。他拒绝让冷漠占据上风，永不放弃梦想，也不让精神凋谢。他知道压力会抑制清晰思考，智能手机已经无处不在，他学习了通货膨胀和学校系统简单的等级制度。他很机灵善于找新方法解决问题，练习分数和实际考试分数之间经常有差异。长时间学习后，他喜欢在附近宁静的公园散步。博物馆有化石展品，他喜欢热天吃龙虾，在电视上看海豚表演。他去村里看奶奶——她的房子有圆屋顶形状的屋顶，池塘里开着荷花。他读到关于一位老兵的书，他是有远见的领导人——人们把他当英雄来崇敬。他了解到小问题如果不及早处理可能升级，新发明每年都在激增，他喜欢带磁性部件的小型小器械。绝缘的电线使电流保持安全，他经常面临困境——先学数学还是英语，努力工作构成成功的关键。学习的每个方面都让他感兴趣，人类的脆弱意味着每个人都会犯错，零星的阵雨有时打断他的学习。他决心纠正薄弱科目，每天冥想十分钟来放松大脑。
+    </div>
+  </div>
+</div>
+<!-- ========================= STORY 12 ========================= -->
+<div class="story" id="story12">
+  <div class="story-header">
+    <h2>故事十二：春节回家</h2>
+    <div class="en-title">Going Home for Spring Festival</div>
+    <div class="meta">主题：节日假期 | 高亮颜色：<span style="color:#3f51b5">■ 靛蓝</span></div>
+  </div>
+
+        <div class="para">
+    <div class="para-en">
+      The Spring Festival was coming, and Xiao Gang could not wait to go home. The train station was full of people — there was an <span class="v v-indigo">uproar<span class="cn">(骚动)</span></span> of noise and excitement everywhere. When the train was delayed, his first <span class="v v-indigo">reflex<span class="cn">(反应)</span></span> was to feel frustrated, but he stayed calm. The waiting hall became a <span class="v v-indigo">refuge<span class="cn">(避难所)</span></span> for tired travelers, and if you miss your train you can get a <span class="v v-indigo">refund<span class="cn">(退款)</span></span> or change your ticket. Xiao Gang hoped the old <span class="v v-indigo">regime<span class="cn">(制度)</span></span> of long lines would change one day. This year he was lucky — the train arrived on time. When he got home, his little cousin said he did not break the vase, but no one could <span class="v v-indigo">refute<span class="cn">(反驳)</span></span> his story because there was no evidence. The whole family sat together eating dumplings and watching TV, and Xiao Gang felt warm and happy inside.
+    </div>
+    <div class="para-cn">
+      春节快到了，小刚迫不及待地想回家。火车站挤满了人——到处都是骚动的噪音和兴奋。当火车晚点时，他的第一反应是感到沮丧，但他保持了冷静。候车大厅成了疲惫旅客的避难所，如果你错过了火车，你可以获得退款或者改签。小刚希望排长队的旧制度有一天能改变。今年他很幸运——火车准点到达了。当他到家时，小表弟说他没有打碎花瓶，但没人能反驳他的说法，因为没有证据。全家人坐在一起吃饺子看电视，小刚心里感到温暖而幸福。
+    </div>
+  </div>
+</div>
+
+<!-- ========================= STORY 13 ========================= -->
+<div class="story" id="story13">
+  <div class="story-header">
+    <h2>故事十三：法庭与正义</h2>
+    <div class="en-title">Justice in the Courtroom</div>
+    <div class="meta">主题：法律与职场 | 高亮颜色：<span style="color:#84cc16">■ 青柠</span></div>
+  </div>
+
+      <div class="para">
+    <div class="para-en">
+      In the city court, Judge Li was <span class="v v-lime">accustomed<span class="cn">(习惯的)</span></span> to handling difficult cases. Today, a young man was <span class="v v-lime">accuse<span class="cn">(指控)</span></span>d of theft, and the <span class="v v-lime">jury<span class="cn">(陪审团)</span></span> listened as the lawyer tried to <span class="v v-lime">justify<span class="cn">(辩护)</span></span> his client's actions. The <span class="v v-lime">justification<span class="cn">(正当理由)</span></span> was that he was desperate and poor, and the judge asked the <span class="v v-lime">referee<span class="cn">(裁判)</span></span> to check the evidence. The man's lawyer was a <span class="v v-lime">proficient<span class="cn">(精通的)</span></span> professional with great <span class="v v-lime">expertise<span class="cn">(专门技术)</span></span>, and the <span class="v v-lime">profession<span class="cn">(职业)</span></span> of law requires honesty. The basic <span class="v v-lime">premise<span class="cn">(前提)</span></span> of the law is fairness, and in <span class="v v-lime">preliminary<span class="cn">(初步的)</span></span> hearings the judge must <span class="v v-lime">preside<span class="cn">(主持)</span></span> fairly. The court's <span class="v v-lime">prestige<span class="cn">(声望)</span></span> depends on every judge being <span class="v v-lime">prestigious<span class="cn">(享有声望的)</span></span> and trustworthy, and the <span class="v v-lime">internal<span class="cn">(内部的)</span></span> rules are strict. <span class="v v-lime">Correspondence<span class="cn">(通信)</span></span> between lawyers must be transparent, and if a contract is found <span class="v v-lime">null<span class="cn">(无效的)</span></span> it has no legal power. The man's <span class="v v-lime">overt<span class="cn">(公然的)</span></span> actions were caught on camera — he could not <span class="v v-lime">refrain<span class="cn">(克制)</span></span> from stealing when hungry. The judge had to <span class="v v-lime">probe<span class="cn">(调查)</span></span> deeper and discovered the man had been abandoned — this was the <span class="v v-lime">precursor<span class="cn">(先驱/前兆)</span></span> to his troubled life. It was easy to <span class="v v-lime">predict<span class="cn">(预言)</span></span> that without help he would continue down a bad path. The <span class="v v-lime">prefix<span class="cn">(前缀)</span></span> "pre-" means "before" — like "predict" means to say before, the man's girlfriend was <span class="v v-lime">pregnant<span class="cn">(怀孕的)</span></span> adding pressure, and the judge gave his <span class="v v-lime">presentation<span class="cn">(陈述)</span></span> to the court with care. He decided the <span class="v v-lime">priority<span class="cn">(优先)</span></span> was rehabilitation, not punishment. The <span class="v v-lime">prescription<span class="cn">(处方/规定)</span></span> was community service and job training, the judge would <span class="v v-lime">endorse<span class="cn">(赞同)</span></span> a <span class="v v-lime">substitute<span class="cn">(替代)</span></span> sentence, and the man's old visa would <span class="v v-lime">expire<span class="cn">(到期)</span></span> soon. The government would <span class="v v-lime">subsidise<span class="cn">(资助)</span></span> his training, the <span class="v v-lime">doctrine<span class="cn">(学说)</span></span> of second chances guided the judge, and he offered <span class="v v-lime">counsel<span class="cn">(忠告)</span></span> to the young man: change your life. The man tried to <span class="v v-lime">retort<span class="cn">(反驳)</span></span> but the judge was firm and wanted <span class="v v-lime">radical<span class="cn">(根本的/激进的)</span></span> change. The court would <span class="v v-lime">authorise<span class="cn">(批准)</span></span> the program, and for <span class="v v-lime">successive<span class="cn">(连续的)</span></span> months the man would report to the court. No one would <span class="v v-lime">sue<span class="cn">(起诉)</span></span> him if he completed the program. The man was at an <span class="v v-lime">intermediate<span class="cn">(中间的)</span></span> stage of his life, <span class="v v-lime">Corruption<span class="cn">(腐败)</span></span> in the city was a <span class="v v-lime">consequent<span class="cn">(随之发生的)</span></span> problem, but justice starts one case at a time.
+    </div>
+    <div class="para-cn">
+      在城市法院里，李法官已经习惯了处理棘手的案件。今天，一个年轻人被指控犯有盗窃罪，陪审团认真倾听律师试图为他的当事人辩护。正当理由是他既绝望又贫困，法官请裁判检查证据。这个人的律师是一位精通业务的专业人士，拥有极高的专门技术，法律这个职业需要诚实。法律的基本前提是公平，在初步听证中法官必须公正地主持。法院的声望取决于每位法官都享有声望且值得信赖，内部规则很严格。律师之间的通信必须透明，如果合同被判为无效的就没有法律效力。这个人的公然行为被摄像头拍到了——他在饥饿时无法克制自己不去偷窃。法官必须深入调查，发现这个人被家人抛弃了——这是他坎坷人生的前兆。很容易预言，如果没有帮助他会继续走上一条不好的道路。前缀"pre-"意思是"在……之前"——比如"predict"意思是提前说出来，这个人的女朋友怀孕了增加了压力，法官小心翼翼地向法庭做了陈述。他认为优先考虑的是改造而非惩罚。规定是社区服务和职业培训，法官赞同用替代判决，这个人的旧签证很快要到期了。政府会资助他的培训，二次机会的学说指引着法官，他给年轻人忠告：改变你的人生。这个人试图反驳但法官很坚定，他想要根本性的改变。法院会批准这个计划，在连续的几个月里这个人要向法院报到。如果他完成了计划就没有人会起诉他。这个人正处于人生的中间阶段，城市中的腐败是一个随之发生的问题，但正义要从一件案件一件案件做起。
+    </div>
+  </div>
+</div>
+
+<!-- ========================= STORY 14 ========================= -->
+<div class="story" id="story14">
+  <div class="story-header">
+    <h2>故事十四：探索与冒险</h2>
+    <div class="en-title">Exploration and Adventure</div>
+    <div class="meta">主题：探索与发现 | 高亮颜色：<span style="color:#c026d3">■ 品红</span></div>
+  </div>
+
+      <div class="para">
+    <div class="para-en">
+      A group of explorers set out to find an <span class="v v-magenta">authentic<span class="cn">(真实的)</span></span> ancient city deep in the jungle. The forest did not <span class="v v-magenta">abound<span class="cn">(富于/充满)</span></span> with clear paths, and their <span class="v v-magenta">exploration<span class="cn">(探险)</span></span> had just begun. An <span class="v v-magenta">abrupt<span class="cn">(突然的)</span></span> storm surprised everyone, the guide was <span class="v v-magenta">furious<span class="cn">(狂怒的)</span></span> and made a big <span class="v v-magenta">fuss<span class="cn">(大惊小怪)</span></span> about the delay, but the team's <span class="v v-magenta">motivation<span class="cn">(动机/动力)</span></span> was strong. They needed <span class="v v-magenta">fuel<span class="cn">(燃料)</span></span> for their lamps and kept walking through the <span class="v v-magenta">bustle<span class="cn">(喧嚣)</span></span> of the noisy forest. After the storm, they found a strange <span class="v v-magenta">cradle<span class="cn">(摇篮/发源地)</span></span> of civilization — ancient stone buildings covered in <span class="v v-magenta">mould<span class="cn">(霉菌)</span></span>. The <span class="v v-magenta">countless<span class="cn">(无数的)</span></span> carvings on the walls told stories of the past, and a <span class="v v-magenta">mortal<span class="cn">(必死的/人类的)</span></span> king had ruled here long ago. The carvings showed his <span class="v v-magenta">conquest<span class="cn">(征服)</span></span> of nearby lands, and the <span class="v v-magenta">hectare<span class="cn">(公顷)</span></span> of land was once a <span class="v v-magenta">glorious<span class="cn">(辉煌的)</span></span> kingdom. The temple had <span class="v v-magenta">exquisite<span class="cn">(精致的)</span></span> paintings, like stepping into a <span class="v v-magenta">fiction<span class="cn">(小说)</span></span> story. They found an ancient <span class="v v-magenta">idiom<span class="cn">(成语/习惯用语)</span></span> carved in stone, a <span class="v v-magenta">hymn<span class="cn">(赞美诗)</span></span> was written on the wall, and the <span class="v v-magenta">costume<span class="cn">(服装)</span></span>s of the ancient people were depicted in the art. They discovered a <span class="v v-magenta">potent<span class="cn">(强有力的)</span></span> medicine plant — its smell entered their <span class="v v-magenta">nostril<span class="cn">(鼻孔)</span></span>s with a sharp scent, and it could <span class="v v-magenta">heal<span class="cn">(治愈)</span></span> many diseases. One explorer had a <span class="v v-magenta">limp<span class="cn">(跛行)</span></span> from an old injury, and after applying the plant his pain began to <span class="v v-magenta">subside<span class="cn">(减退/平息)</span></span>. They would <span class="v v-magenta">linger<span class="cn">(逗留)</span></span> here for days studying the ruins, the <span class="v v-magenta">motion<span class="cn">(运动)</span></span> of the river provided fresh water, and they made sure to <span class="v v-magenta">retain<span class="cn">(保留)</span></span> samples of everything. An <span class="v v-magenta">outburst<span class="cn">(爆发)</span></span> of joy came when they discovered a golden mask, and they stayed <span class="v v-magenta">overnight<span class="cn">(通宵的/过夜的)</span></span> in the ruins. The <span class="v v-magenta">minimum<span class="cn">(最小值/最小的)</span></span> supplies they had were enough, they kept <span class="v v-magenta">retail<span class="cn">(零售)</span></span> supplies in their backpacks, and their <span class="v v-magenta">lengthy<span class="cn">(冗长的)</span></span> journey was paying off. A nearby <span class="v v-magenta">lighthouse<span class="cn">(灯塔)</span></span> guided them back to the coast, and the <span class="v v-magenta">grant<span class="cn">(拨款/授予)</span></span> from the university funded their trip. The university would <span class="v v-magenta">consign<span class="cn">(交付/委托)</span></span> the artifacts to a museum, they did not want to <span class="v v-magenta">hurl<span class="cn">(猛投/猛掷)</span></span> away their findings carelessly, and time would <span class="v v-magenta">corrode<span class="cn">(腐蚀)</span></span> the ancient stones if not protected. The team would <span class="v v-magenta">resume<span class="cn">(重新开始)</span></span> the expedition next year, some members would <span class="v v-magenta">retire<span class="cn">(退休)</span></span> from fieldwork after this trip, and they would <span class="v v-magenta">crawl<span class="cn">(爬行)</span></span> back through the jungle. The discovery was a <span class="v v-magenta">tremendous<span class="cn">(巨大的)</span></span> achievement, they felt <span class="v v-magenta">vigorous<span class="cn">(精力旺盛的)</span></span> and alive, and their story was <span class="v v-magenta">superb<span class="cn">(卓越的)</span></span> — one for the history books.
+    </div>
+    <div class="para-cn">
+      一群探险家出发去寻找丛林深处一座真实的古城。森林里并不富于清晰的路径，他们的探险才刚刚开始。突然的暴风雨让所有人吃惊，向导很狂怒，为延误大惊小怪，但团队的动力很足。他们需要燃料来点灯，继续穿过喧嚣的丛林。暴风雨后，他们发现了一个奇特的文明摇篮——布满霉菌的古老石头建筑。墙上无数的雕刻讲述了过去的故事，一位必死的国王很久以前曾统治这里。雕刻展示了他对附近土地的征服，这片公顷的土地曾经是辉煌的王国。寺庙里有精致的绘画，就像走进了小说故事。他们发现了一块石头上刻着的古代成语，墙上写着一首赞美诗，古代人的服装也在艺术中被描绘。他们发现了一种强有力的药用植物——气味进入鼻孔带着刺鼻的香味，它可以治愈许多疾病。一位探险家因旧伤而跛行，敷上植物后疼痛开始减退。他们会在这里逗留几天研究废墟，附近河流的运动提供了淡水，他们确保保留所发现的一切样本。当他们发现一个金色面具时爆发出欢乐的欢呼，他们在废墟中过了一夜。他们携带的最少量的物资就足够了，背包里存放着零售物资，冗长的旅程终于有了回报。附近的一座灯塔指引他们回到海岸，大学提供的拨款资助了这次旅行。大学会将这些文物交付给博物馆，他们不想不小心地猛投丢掉发现，如果不加以保护时间会腐蚀古老的石头。团队明年会重新开始探险，有些成员旅行后将退出野外工作，他们会爬行穿过丛林到达海岸。这次发现是巨大的成就，他们感到精力旺盛而充满活力，他们的故事是卓越的——足以载入史册。
+    </div>
+  </div>
+</div>
+
+<!-- ========================= STORY 15 ========================= -->
+<div class="story" id="story15">
+  <div class="story-header">
+    <h2>故事十五：日常生活百态</h2>
+    <div class="en-title">Scenes from Daily Life</div>
+    <div class="meta">主题：日常与情感 | 高亮颜色：<span style="color:#1e40af">■ 海蓝</span></div>
+  </div>
+
+      <div class="para">
+    <div class="para-en">
+      In the <span class="v v-navy">suburb<span class="cn">(郊区)</span></span> where Xiao Li lived, life was simple. Every morning she would <span class="v v-navy">activate<span class="cn">(激活)</span></span> her phone and drink water to quench her <span class="v v-navy">thirst<span class="cn">(口渴)</span></span>. The <span class="v v-navy">rhythm<span class="cn">(节奏)</span></span> of daily life was calm, she wore a <span class="v v-navy">ribbon<span class="cn">(丝带)</span></span> in her hair, and her room had <span class="v v-navy">tile<span class="cn">(瓷砖)</span></span> floors and a <span class="v v-navy">transparent<span class="cn">(透明的)</span></span> glass window. On her desk was a <span class="v v-navy">tray<span class="cn">(托盘)</span></span> holding her <span class="v v-navy">treasure<span class="cn">(珍宝/珍爱)</span></span>s — small gifts from friends. She was <span class="v v-navy">apt<span class="cn">(有…倾向的/灵巧的)</span></span> at drawing, her cat would <span class="v v-navy">curl<span class="cn">(卷曲)</span></span> up beside her, and sometimes the cat would <span class="v v-navy">doze<span class="cn">(打瞌睡)</span></span> on her lap. She felt the <span class="v v-navy">virtue<span class="cn">(德行/优点)</span></span> of patience was important in life. One day, there was a water <span class="v v-navy">shortage<span class="cn">(不足/缺少)</span></span> in the neighborhood, a <span class="v v-navy">trench<span class="cn">(沟渠)</span></span> was dug in the street, and the city had to <span class="v v-navy">summon<span class="cn">(召集)</span></span> workers quickly. She watched the workers <span class="v v-navy">tighten<span class="cn">(拧紧)</span></span> the bolts on the new pipes and did not <span class="v v-navy">despise<span class="cn">(鄙视)</span></span> their hard work — she respected it. The workers' <span class="v v-navy">velocity<span class="cn">(速度)</span></span> was impressive, a <span class="v v-navy">supersonic<span class="cn">(超音速的)</span></span> jet flew overhead, and a coffee <span class="v v-navy">stain<span class="cn">(污点)</span></span> on her shirt made her <span class="v v-navy">frown<span class="cn">(皱眉)</span></span>. She felt a <span class="v v-navy">shiver<span class="cn">(发抖/冷颤)</span></span> in the cold wind, her neighbor was <span class="v v-navy">rigid<span class="cn">(死板的/刚硬的)</span></span> in his opinions, and the <span class="v v-navy">rim<span class="cn">(边缘)</span></span> of her cup was chipped. She tried to <span class="v v-navy">heal<span class="cn">(治愈)</span></span> her chapped hands with cream. Xiao Li's uncle had a <span class="v v-navy">donkey<span class="cn">(驴)</span></span> on his farm and ran a small <span class="v v-navy">dock<span class="cn">(码头)</span></span> by the river. At the <span class="v v-navy">dock<span class="cn">(码头)</span></span>, boats brought fresh fish, and the <span class="v v-navy">approximate<span class="cn">(近似的/大约的)</span></span> number of fish per day was about two hundred. Her uncle was a <span class="v v-navy">venerable<span class="cn">(值得尊敬的)</span></span> old man with a <span class="v v-navy">vigorous<span class="cn">(精力旺盛的)</span></span> spirit despite his age. Sometimes people would <span class="v v-navy">threaten<span class="cn">(威胁)</span></span> to take his land, but he never gave in and did not seek <span class="v v-navy">revenge<span class="cn">(报仇/复仇)</span></span> — he believed in peace. His life was <span class="v v-navy">superb<span class="cn">(卓越的)</span></span> and full of meaning, and he showed <span class="v v-navy">tremendous<span class="cn">(巨大的)</span></span> courage in hard times.
+    </div>
+    <div class="para-cn">
+      在小李居住的郊区，生活很简单。每天早上她激活手机查看消息，喝水解口渴。日常生活的节奏平静，她在头发上系了一条丝带，房间有瓷砖地板和透明的玻璃窗。桌上有一个托盘放着她的珍宝——朋友们送的小礼物。她擅长画画，猫会卷曲在她身旁，有时猫会在她腿上打瞌睡。她觉得耐心这个德行在生活中很重要。有一天，附近出现了水不足的情况，街上挖了一条沟渠，城市不得不迅速召集工人。她看着工人们拧紧新管道上的螺栓，她不鄙视他们的辛苦工作——她很尊重。工人们的速度令人赞叹，一架超音速的喷气式飞机从头顶飞过，衬衫上的咖啡污点让她皱眉。她在冷风中发抖，邻居在观点上很死板，她杯子的边缘磕破了。她试着用护手霜治愈干裂的手。小李的叔叔在农场里养了一头驴，还在河边经营一个小码头。在码头，船只带来了新鲜的鱼，每天近似的捕鱼数量大约是两百条。她的叔叔是一位值得尊敬的老人，尽管年事已高仍有精力旺盛的精神。有时有人会威胁要夺走他的土地，但他从不屈服，也不寻求复仇——他相信和平。他的生活是卓越的，充满意义，在困难时期展现出巨大的勇气。
+    </div>
+  </div>
+</div>
+
+<!-- ========================= WORD LIST ========================= -->
+<div class="word-list-section" id="wordlist">
+  <h2>词汇总表 — 1317 词</h2>
+  <div class="legend">
+    <span><span class="dot dot-yellow"></span> 故事一</span>
+    <span><span class="dot dot-green"></span> 故事二</span>
+    <span><span class="dot dot-blue"></span> 故事三</span>
+    <span><span class="dot dot-purple"></span> 故事四</span>
+    <span><span class="dot dot-orange"></span> 故事五</span>
+    <span><span class="dot dot-teal"></span> 故事六</span>
+    <span><span class="dot dot-red"></span> 故事七</span>
+    <span><span class="dot dot-cyan"></span> 故事八</span>
+    <span><span class="dot dot-pink"></span> 故事九</span>
+    <span><span class="dot dot-brown"></span> 故事十</span>
+    <span><span class="dot dot-gold"></span> 故事十一</span>
+    <span><span class="dot dot-indigo"></span> 故事十二</span>
+    <span><span class="dot dot-lime"></span> 故事十三</span>
+    <span><span class="dot dot-magenta"></span> 故事十四</span>
+    <span><span class="dot dot-navy"></span> 故事十五</span>
+  </div>
+  <div class="view-toggle">
+    <button class="view-btn active" onclick="setWordView('all')" data-view="all">📖 全部显示</button>
+    <button class="view-btn" onclick="setWordView('en')" data-view="en">🔤 只显示英文</button>
+    <button class="view-btn" onclick="setWordView('cn')" data-view="cn">🀄 只显示中文</button>
+  </div>
+  <div class="star-toolbar">
+    <button class="star-btn" id="selectModeBtn" onclick="toggleSelectMode()">☑️ 选择模式</button>
+    <button class="star-btn" id="selectAllBtn" onclick="selectAllCards()" style="display:none;">✅ 全选</button>
+    <button class="star-btn star-action" id="starSelectedBtn" onclick="batchStar(true)" style="display:none;">⭐ 标记重点</button>
+    <button class="star-btn star-action" id="unstarSelectedBtn" onclick="batchStar(false)" style="display:none;">❌ 取消重点</button>
+    <button class="star-btn" id="filterStarredBtn" onclick="toggleFilterStarred()">🌟 只看重点</button>
+    <span class="star-count" id="starCount">已标记 0 个重点词</span>
+  </div>
+  <div class="word-grid" id="wordGrid"></div>
+</div>
+
+</main>
+
+<footer>
+  <p>词汇记忆小短文 · 共 1317 个标黄词汇 · 15 篇主题短文</p>
+  <p style="margin-top:6px;">每个高亮词汇旁标注中文释义，每段下方附完整中文翻译，方便对照记忆。</p>
+  <p style="margin-top:8px; font-size:.9em; color:var(--accent);">🔊 点击任意高亮单词或词汇总表中的单词，即可播放英式发音</p>
+</footer>
+
+<script>
+// Word list data
+const words = [
+  {en:"aquatic", cn:"水生的", color:"purple"},
+  {en:"arboreal", cn:"树栖的", color:"purple"},
+  {en:"ardent", cn:"热情的", color:"yellow"},
+  {en:"arduous", cn:"艰巨的", color:"purple"},
+  {en:"arid", cn:"干旱的", color:"purple"},
+  {en:"aristocrat", cn:"贵族", color:"blue"},
+  {en:"arithmetic", cn:"算术", color:"yellow"},
+  {en:"arrogant", cn:"傲慢的", color:"yellow"},
+  {en:"arsenal", cn:"军械库", color:"blue"},
+  {en:"backfire", cn:"适得其反", color:"purple"},
+  {en:"badger", cn:"獾", color:"purple"},
+  {en:"baffle", cn:"使困惑", color:"yellow"},
+  {en:"bail", cn:"保释/脱困", color:"purple"},
+  {en:"breach", cn:"缺口", color:"blue"},
+  {en:"brew", cn:"冲泡/酝酿", color:"green"},
+  {en:"brim", cn:"边缘", color:"green"},
+  {en:"brittle", cn:"易碎的", color:"green"},
+  {en:"brochure", cn:"小册子", color:"yellow"},
+  {en:"frenzy", cn:"狂热", color:"blue"},
+  {en:"hectic", cn:"忙乱的", color:"green"},
+  {en:"hose", cn:"软管", color:"green"},
+  {en:"hub", cn:"中心", color:"yellow"},
+  {en:"incisive", cn:"尖锐的/精辟的", color:"yellow"},
+  {en:"increment", cn:"增加", color:"yellow"},
+  {en:"incumbent", cn:"现任的", color:"yellow"},
+  {en:"insult", cn:"侮辱", color:"yellow"},
+  {en:"intact", cn:"完好无损的", color:"green"},
+  {en:"intangible", cn:"无形的", color:"green"},
+  {en:"integral", cn:"不可或缺的", color:"yellow"},
+  {en:"intelligence", cn:"智力/情报", color:"yellow"},
+  {en:"intersection", cn:"交叉路口", color:"purple"},
+  {en:"intimidate", cn:"恐吓", color:"yellow"},
+  {en:"portfolio", cn:"文件夹", color:"yellow"},
+  {en:"repatriate", cn:"遣返", color:"blue"},
+  {en:"repeal", cn:"废除", color:"blue"},
+  {en:"repent", cn:"后悔", color:"blue"},
+  {en:"repetition", cn:"重复", color:"yellow"},
+  {en:"reproductive", cn:"生殖的/再生的", color:"blue"},
+  {en:"resort", cn:"度假胜地", color:"blue"},
+  {en:"resurrection", cn:"复苏", color:"blue"},
+  {en:"retard", cn:"阻碍", color:"blue"},
+  {en:"sabotage", cn:"蓄意破坏", color:"blue"},
+  {en:"saddle", cn:"马鞍", color:"blue"},
+  {en:"saga", cn:"传奇", color:"blue"},
+  {en:"saline", cn:"含盐的", color:"blue"},
+  {en:"salvage", cn:"抢救", color:"blue"},
+  {en:"sanctuary", cn:"避难所", color:"blue"},
+  {en:"sanitation", cn:"卫生", color:"green"},
+  {en:"sarcasm", cn:"讽刺", color:"blue"},
+  {en:"seclusion", cn:"隔离", color:"blue"},
+  {en:"semblance", cn:"表象", color:"yellow"},
+  {en:"sensation", cn:"感觉", color:"blue"},
+  {en:"sensory", cn:"感官的", color:"blue"},
+  {en:"shameful", cn:"可耻的", color:"yellow"},
+  {en:"squash", cn:"压扁", color:"green"},
+  {en:"stagnant", cn:"停滞的", color:"green"},
+  {en:"stalk", cn:"潜行跟踪", color:"purple"},
+  {en:"staple", cn:"主要的", color:"yellow"},
+  {en:"starch", cn:"淀粉", color:"green"},
+  {en:"static", cn:"静态的", color:"green"},
+  {en:"stationery", cn:"文具", color:"yellow"},
+  {en:"steadfast", cn:"坚定的", color:"green"},
+  {en:"stereotype", cn:"刻板印象", color:"yellow"},
+  {en:"sterile", cn:"无菌的", color:"green"},
+  {en:"stigma", cn:"污名", color:"blue"},
+  {en:"tactic", cn:"战术", color:"blue"},
+  {en:"tamper", cn:"篡改", color:"blue"},
+  {en:"trash", cn:"垃圾", color:"green"},
+  {en:"trauma", cn:"创伤", color:"blue"},
+  {en:"tangle", cn:"缠结", color:"green"},
+  {en:"traverse", cn:"穿越", color:"purple"},
+  {en:"treason", cn:"叛国", color:"blue"},
+  {en:"vigilance", cn:"警惕", color:"green"},
+  // --- Story 5 (orange) ---
+  {en:"abdomen", cn:"腹部", color:"orange"},
+  {en:"abominable", cn:"可憎的", color:"orange"},
+  {en:"absenteeism", cn:"缺勤", color:"orange"},
+  {en:"alternative", cn:"替代方案", color:"orange"},
+  {en:"ambiguity", cn:"模棱两可", color:"orange"},
+  {en:"anticipation", cn:"期待", color:"orange"},
+  {en:"arthritis", cn:"关节炎", color:"orange"},
+  {en:"artillery", cn:"炮兵", color:"orange"},
+  {en:"aspiring", cn:"有抱负的", color:"orange"},
+  {en:"assassinate", cn:"暗杀", color:"orange"},
+  {en:"assemblage", cn:"聚集", color:"orange"},
+  {en:"asset", cn:"资产", color:"orange"},
+  {en:"assimilate", cn:"吸收", color:"orange"},
+  {en:"astound", cn:"使震惊", color:"orange"},
+  {en:"astute", cn:"精明的", color:"orange"},
+  {en:"asylum", cn:"庇护", color:"orange"},
+  {en:"asymmetrical", cn:"不对称的", color:"orange"},
+  {en:"auction", cn:"拍卖", color:"orange"},
+  {en:"audacious", cn:"大胆的", color:"orange"},
+  {en:"audible", cn:"听得见的", color:"orange"},
+  {en:"audit", cn:"审计", color:"orange"},
+  {en:"audition", cn:"试镜/测试", color:"orange"},
+  {en:"auger", cn:"钻孔器", color:"orange"},
+  {en:"aurora", cn:"极光/光彩", color:"orange"},
+  {en:"avail", cn:"有益于", color:"orange"},
+  {en:"blush", cn:"脸红", color:"orange"},
+  {en:"courtesy", cn:"礼貌", color:"orange"},
+  {en:"courtship", cn:"求偶", color:"orange"},
+  {en:"covet", cn:"垂涎", color:"orange"},
+  {en:"cozy", cn:"舒适的", color:"orange"},
+  {en:"cracker", cn:"饼干", color:"orange"},
+  {en:"credibility", cn:"可信度", color:"orange"},
+  {en:"crisp", cn:"脆的", color:"orange"},
+  {en:"crude", cn:"粗糙的", color:"orange"},
+  {en:"cruise", cn:"巡游", color:"orange"},
+  {en:"cruiser", cn:"游艇", color:"orange"},
+  {en:"lucrative", cn:"有利可图的", color:"orange"},
+  {en:"lullaby", cn:"摇篮曲", color:"orange"},
+  {en:"malicious", cn:"恶意的", color:"orange"},
+  {en:"malign", cn:"诽谤", color:"orange"},
+  {en:"monotonous", cn:"单调的", color:"orange"},
+  {en:"morale", cn:"士气", color:"orange"},
+  {en:"motto", cn:"格言", color:"orange"},
+  {en:"mourning", cn:"哀悼", color:"orange"},
+  {en:"obstruct", cn:"阻碍", color:"orange"},
+  {en:"occurrence", cn:"事件", color:"orange"},
+  {en:"orbit", cn:"轨道", color:"orange"},
+  {en:"ore", cn:"矿石", color:"orange"},
+  {en:"ornament", cn:"装饰品", color:"orange"},
+  {en:"orthodox", cn:"正统的", color:"orange"},
+  {en:"straightforward", cn:"直截了当的", color:"orange"},
+  {en:"trivial", cn:"琐碎的", color:"orange"},
+  {en:"trophy", cn:"奖杯", color:"orange"},
+  // --- Story 6 (teal) ---
+  {en:"retrospective", cn:"回顾展", color:"teal"},
+  {en:"reverent", cn:"恭敬的", color:"teal"},
+  {en:"reversion", cn:"恢复", color:"teal"},
+  {en:"revile", cn:"辱骂", color:"teal"},
+  {en:"revitalise", cn:"使复兴", color:"teal"},
+  {en:"righteous", cn:"正义的", color:"teal"},
+  {en:"ripple", cn:"涟漪", color:"teal"},
+  {en:"slime", cn:"黏液", color:"teal"},
+  {en:"sovereign", cn:"君主", color:"teal"},
+  {en:"strand", cn:"使搁浅", color:"teal"},
+  {en:"strap", cn:"皮带", color:"teal"},
+  {en:"strenuous", cn:"费力的", color:"teal"},
+  {en:"strife", cn:"冲突", color:"teal"},
+  {en:"stringent", cn:"严格的", color:"teal"},
+  {en:"stripe", cn:"条纹", color:"teal"},
+  {en:"submissive", cn:"顺从的", color:"teal"},
+  {en:"subscribe", cn:"赞同/订阅", color:"teal"},
+  {en:"subsidiary", cn:"附属的", color:"teal"},
+  {en:"subsidy", cn:"补贴", color:"teal"},
+  {en:"suffrage", cn:"选举权", color:"teal"},
+  {en:"sullen", cn:"阴沉的", color:"teal"},
+  {en:"superfluous", cn:"多余的", color:"teal"},
+  {en:"tenacious", cn:"坚韧的", color:"teal"},
+  {en:"tenancy", cn:"租佃/居住权", color:"teal"},
+  {en:"trample", cn:"践踏", color:"teal"},
+  {en:"trespass", cn:"非法侵入", color:"teal"},
+  {en:"tricky", cn:"棘手的", color:"teal"},
+  {en:"trifle", cn:"琐事", color:"teal"},
+  {en:"trigger", cn:"触发", color:"teal"},
+  {en:"triumph", cn:"胜利", color:"teal"},
+  // --- Story 7 (red) ---
+  {en:"abnormal", cn:"反常的", color:"red"},
+  {en:"abolish", cn:"废除", color:"red"},
+  {en:"allot", cn:"分配", color:"red"},
+  {en:"apparatus", cn:"设备", color:"red"},
+  {en:"apparel", cn:"服装", color:"red"},
+  {en:"appliance", cn:"器械", color:"red"},
+  {en:"appraisal", cn:"评价", color:"red"},
+  {en:"apprentice", cn:"学徒", color:"red"},
+  {en:"apron", cn:"围裙", color:"red"},
+  {en:"broker", cn:"经纪人", color:"red"},
+  {en:"brood", cn:"沉思", color:"red"},
+  {en:"cascade", cn:"瀑布般落下", color:"red"},
+  {en:"casual", cn:"随意的", color:"red"},
+  {en:"casualty", cn:"伤亡/受害者", color:"red"},
+  {en:"composition", cn:"组合/作品", color:"red"},
+  {en:"confusion", cn:"混乱", color:"red"},
+  {en:"congregate", cn:"聚集", color:"red"},
+  {en:"contaminate", cn:"污染", color:"red"},
+  {en:"contemplate", cn:"考虑/思考", color:"red"},
+  {en:"controversial", cn:"有争议的", color:"red"},
+  {en:"controversy", cn:"争议", color:"red"},
+  {en:"converge", cn:"汇聚", color:"red"},
+  {en:"conversely", cn:"相反地", color:"red"},
+  {en:"convertible", cn:"可折叠的", color:"red"},
+  {en:"convoy", cn:"护送/护航", color:"red"},
+  {en:"coral", cn:"珊瑚", color:"red"},
+  {en:"cordial", cn:"热忱的/诚恳的", color:"red"},
+  {en:"epoch", cn:"时代", color:"red"},
+  {en:"erroneous", cn:"错误的", color:"red"},
+  {en:"escort", cn:"护送", color:"red"},
+  {en:"evergreen", cn:"常青的", color:"red"},
+  {en:"exaggerate", cn:"夸大", color:"red"},
+  {en:"excavate", cn:"挖掘", color:"red"},
+  {en:"fervent", cn:"热烈的", color:"red"},
+  {en:"fake", cn:"假的", color:"red"},
+  {en:"fluid", cn:"流畅的", color:"red"},
+  {en:"fraught", cn:"充满的", color:"red"},
+  {en:"freak", cn:"反常的", color:"red"},
+  {en:"glacier", cn:"冰川", color:"red"},
+  {en:"glamorous", cn:"迷人的", color:"red"},
+  {en:"grill", cn:"烤架", color:"red"},
+  {en:"grin", cn:"咧嘴笑", color:"red"},
+  {en:"lottery", cn:"彩票/巧合", color:"red"},
+  {en:"miserable", cn:"痛苦的", color:"red"},
+  {en:"opt", cn:"选择", color:"red"},
+  // --- Story 8 (cyan) ---
+  {en:"deprivation", cn:"剥夺/匮乏", color:"cyan"},
+  {en:"longitude", cn:"经度", color:"cyan"},
+  {en:"loop", cn:"圈/环/回路", color:"cyan"},
+  {en:"loose", cn:"宽松的", color:"cyan"},
+  {en:"lorry", cn:"卡车", color:"cyan"},
+  {en:"manifestation", cn:"表现", color:"cyan"},
+  {en:"mirage", cn:"海市蜃楼", color:"cyan"},
+  {en:"mitigate", cn:"减轻/缓和", color:"cyan"},
+  {en:"module", cn:"模块", color:"cyan"},
+  {en:"molecule", cn:"分子", color:"cyan"},
+  {en:"molten", cn:"熔化的", color:"cyan"},
+  {en:"momentous", cn:"重大的", color:"cyan"},
+  {en:"monarchy", cn:"君主制", color:"cyan"},
+  {en:"odyssey", cn:"长途冒险旅行", color:"cyan"},
+  {en:"offensive", cn:"冒犯的/进攻的", color:"cyan"},
+  {en:"onset", cn:"开始/进攻", color:"cyan"},
+  {en:"optical", cn:"光学的/视力的", color:"cyan"},
+  {en:"prowess", cn:"非凡的能力", color:"cyan"},
+  {en:"prudence", cn:"谨慎", color:"cyan"},
+  {en:"puddle", cn:"水坑", color:"cyan"},
+  {en:"puff", cn:"一阵/膨胀", color:"cyan"},
+  {en:"reliance", cn:"依靠", color:"cyan"},
+  {en:"religious", cn:"严谨的/宗教的", color:"cyan"},
+  {en:"relinquish", cn:"放弃", color:"cyan"},
+  {en:"respiration", cn:"呼吸", color:"cyan"},
+  {en:"responsive", cn:"响应的/灵敏的", color:"cyan"},
+  {en:"sticky", cn:"黏的", color:"cyan"},
+  {en:"weed", cn:"野草", color:"cyan"},
+  // --- Story 9 (pink) ---
+  {en:"brilliance", cn:"光辉", color:"pink"},
+  {en:"broom", cn:"扫帚", color:"pink"},
+  {en:"buckle", cn:"皮带扣/屈服", color:"pink"},
+  {en:"buffer", cn:"缓冲器", color:"pink"},
+  {en:"buffet", cn:"自助餐", color:"pink"},
+  {en:"bulb", cn:"灯泡", color:"pink"},
+  {en:"bulk", cn:"大批/大部分", color:"pink"},
+  {en:"caterpillar", cn:"毛虫", color:"pink"},
+  {en:"cavity", cn:"洞/空穴", color:"pink"},
+  {en:"celebrity", cn:"名人", color:"pink"},
+  {en:"censorship", cn:"审查制度", color:"pink"},
+  {en:"chapel", cn:"小教堂", color:"pink"},
+  {en:"characterise", cn:"表现特色", color:"pink"},
+  {en:"commotion", cn:"混乱/骚动", color:"pink"},
+  {en:"counteract", cn:"抵消/中和", color:"pink"},
+  {en:"counterfeit", cn:"伪造的/赝品", color:"pink"},
+  {en:"counterpart", cn:"配对物/副本", color:"pink"},
+  {en:"coup", cn:"妙计/政变", color:"pink"},
+  {en:"courier", cn:"信使/快递员", color:"pink"},
+  {en:"corpus", cn:"语料库/尸体", color:"pink"},
+  {en:"correlation", cn:"相关性", color:"pink"},
+  {en:"corridor", cn:"走廊", color:"pink"},
+  {en:"cosmic", cn:"宇宙的", color:"pink"},
+  {en:"cosmopolitan", cn:"世界性的", color:"pink"},
+  {en:"counter", cn:"计数器/反驳", color:"pink"},
+  {en:"disappoint", cn:"使失望", color:"pink"},
+  {en:"discord", cn:"不和/纷争", color:"pink"},
+  {en:"discourse", cn:"话语/演讲", color:"pink"},
+  {en:"discrete", cn:"离散的", color:"pink"},
+  {en:"disdain", cn:"蔑视/轻视", color:"pink"},
+  {en:"disfigure", cn:"使变丑", color:"pink"},
+  {en:"disillusion", cn:"幻灭/觉醒", color:"pink"},
+  {en:"dispatch", cn:"派遣/急件", color:"pink"},
+  {en:"diverge", cn:"分叉/分歧", color:"pink"},
+  {en:"diversify", cn:"多样化", color:"pink"},
+  {en:"dividend", cn:"股息/红利", color:"pink"},
+  {en:"dogged", cn:"顽强的", color:"pink"},
+  {en:"doom", cn:"命运/注定", color:"pink"},
+  {en:"doomed", cn:"注定的", color:"pink"},
+  {en:"elite", cn:"精英", color:"pink"},
+  {en:"encore", cn:"要求加演", color:"pink"},
+  {en:"excursion", cn:"远足/游览", color:"pink"},
+  {en:"exemplify", cn:"例证/例示", color:"pink"},
+  {en:"exempt", cn:"免除", color:"pink"},
+  {en:"exile", cn:"放逐/流放", color:"pink"},
+  {en:"exotic", cn:"异国情调的", color:"pink"},
+  {en:"explicit", cn:"清楚的/直率的", color:"pink"},
+  {en:"feat", cn:"功绩/技艺", color:"pink"},
+  {en:"feeble", cn:"虚弱的", color:"pink"},
+  {en:"friction", cn:"摩擦", color:"pink"},
+  {en:"frigid", cn:"寒冷的/冷淡的", color:"pink"},
+  {en:"fringe", cn:"边缘/流苏", color:"pink"},
+  {en:"fulfilment", cn:"履行/实现", color:"pink"},
+  {en:"germ", cn:"微生物/幼芽", color:"pink"},
+  {en:"giddy", cn:"眼花的/头晕的", color:"pink"},
+  {en:"gully", cn:"溪谷/峡谷", color:"pink"},
+  {en:"guru", cn:"大师/专家", color:"pink"},
+  {en:"gush", cn:"涌出/喷涌", color:"pink"},
+  {en:"hybrid", cn:"杂交的/混合的", color:"pink"},
+  {en:"hydrogen", cn:"氢气", color:"pink"},
+  {en:"hygiene", cn:"卫生", color:"pink"},
+  {en:"improvise", cn:"即席创作", color:"pink"},
+  {en:"inappropriate", cn:"不适当的", color:"pink"},
+  {en:"incessant", cn:"不断的", color:"pink"},
+  {en:"incipient", cn:"起初的/初期的", color:"pink"},
+  {en:"intrepid", cn:"无畏的/勇猛的", color:"pink"},
+  {en:"laborious", cn:"费力的/勤劳的", color:"pink"},
+  {en:"labyrinth", cn:"迷宫", color:"pink"},
+  {en:"lag", cn:"落后", color:"pink"},
+  // --- Story 10 (brown) ---
+  {en:"hover", cn:"翱翔/徘徊", color:"brown"},
+  {en:"indigent", cn:"贫困的", color:"brown"},
+  {en:"lull", cn:"使平静", color:"brown"},
+  {en:"lunar", cn:"月的", color:"brown"},
+  {en:"pavilion", cn:"亭子", color:"brown"},
+  {en:"pawn", cn:"典当/抵押", color:"brown"},
+  {en:"perceptible", cn:"可察觉的", color:"brown"},
+  {en:"perimeter", cn:"周长/边缘", color:"brown"},
+  {en:"predominant", cn:"主要的/支配的", color:"brown"},
+  {en:"preeminent", cn:"卓越的", color:"brown"},
+  {en:"premature", cn:"未成熟的", color:"brown"},
+  {en:"premium", cn:"额外费用/奖金", color:"brown"},
+  {en:"prerequisite", cn:"先决条件", color:"brown"},
+  {en:"prescribe", cn:"开处方/规定", color:"brown"},
+  {en:"presumably", cn:"大概/据推测", color:"brown"},
+  {en:"pretentious", cn:"做作的/自命不凡的", color:"brown"},
+  {en:"prey", cn:"捕食/猎物", color:"brown"},
+  {en:"probation", cn:"试用期/缓刑", color:"brown"},
+  {en:"procure", cn:"获得/取得", color:"brown"},
+  {en:"proficiency", cn:"熟练/精通", color:"brown"},
+  {en:"intricate", cn:"复杂的", color:"brown"},
+  {en:"intrigue", cn:"阴谋/使着迷", color:"brown"},
+  {en:"intrinsic", cn:"内在的/本质的", color:"brown"},
+  {en:"intrude", cn:"闯入/侵扰", color:"brown"},
+  // Story 11 — Gold
+  {en:"abashed", cn:"窘迫的", color:"gold"},
+  {en:"abject", cn:"卑鄙的/可怜的", color:"gold"},
+  {en:"adaptation", cn:"适应", color:"gold"},
+  {en:"animated", cn:"活泼的", color:"gold"},
+  {en:"annex", cn:"兼并", color:"gold"},
+  {en:"annihilate", cn:"毁灭", color:"gold"},
+  {en:"antagonism", cn:"对抗", color:"gold"},
+  {en:"antelope", cn:"羚羊", color:"gold"},
+  {en:"antenna", cn:"天线", color:"gold"},
+  {en:"antibiotic", cn:"抗生素", color:"gold"},
+  {en:"antidote", cn:"解毒剂", color:"gold"},
+  {en:"antiquated", cn:"陈旧的", color:"gold"},
+  {en:"antiseptic", cn:"杀菌剂", color:"gold"},
+  {en:"apace", cn:"快速地", color:"gold"},
+  {en:"apathy", cn:"冷漠", color:"gold"},
+  {en:"appalling", cn:"骇人的", color:"gold"},
+  {en:"banish", cn:"驱逐", color:"gold"},
+  {en:"bonanza", cn:"财富", color:"gold"},
+  {en:"booth", cn:"货摊", color:"gold"},
+  {en:"boulder", cn:"巨石", color:"gold"},
+  {en:"bouquet", cn:"花束", color:"gold"},
+  {en:"boycott", cn:"联合抵制", color:"gold"},
+  {en:"brandish", cn:"挥舞", color:"gold"},
+  {en:"brevity", cn:"简洁", color:"gold"},
+  {en:"candid", cn:"率直的", color:"gold"},
+  {en:"capricious", cn:"善变的", color:"gold"},
+  {en:"cargo", cn:"货物", color:"gold"},
+  {en:"carnival", cn:"狂欢节", color:"gold"},
+  {en:"confiscate", cn:"没收", color:"gold"},
+  {en:"conspiracy", cn:"阴谋", color:"gold"},
+  {en:"constellation", cn:"星座", color:"gold"},
+  {en:"constitute", cn:"构成", color:"gold"},
+  {en:"consummate", cn:"完美的", color:"gold"},
+  {en:"diligent", cn:"勤勉的", color:"gold"},
+  {en:"discrepancy", cn:"差异", color:"gold"},
+  {en:"distend", cn:"膨胀", color:"gold"},
+  {en:"distress", cn:"痛苦", color:"gold"},
+  {en:"err", cn:"犯错", color:"gold"},
+  {en:"errand", cn:"差事/使命", color:"gold"},
+  {en:"eradicate", cn:"根除", color:"gold"},
+  {en:"facade", cn:"正面/外观", color:"gold"},
+  {en:"facet", cn:"方面", color:"gold"},
+  {en:"facsimile", cn:"副本/传真", color:"gold"},
+  {en:"fortress", cn:"堡垒", color:"gold"},
+  {en:"forum", cn:"论坛", color:"gold"},
+  {en:"fossil", cn:"化石", color:"gold"},
+  {en:"frailty", cn:"虚弱/脆弱", color:"gold"},
+  {en:"franchise", cn:"特权/经销权", color:"gold"},
+  {en:"insatiable", cn:"贪得无厌的", color:"gold"},
+  {en:"magnificent", cn:"壮丽的", color:"gold"},
+  {en:"metropolitan", cn:"大城市的", color:"gold"},
+  {en:"migrate", cn:"迁徙", color:"gold"},
+  {en:"militant", cn:"好战的", color:"gold"},
+  {en:"methodology", cn:"方法论", color:"gold"},
+  {en:"meticulous", cn:"细致的", color:"gold"},
+  {en:"mimic", cn:"模仿", color:"gold"},
+  {en:"mince", cn:"切碎/委婉说", color:"gold"},
+  {en:"mint", cn:"薄荷/造币厂", color:"gold"},
+  {en:"novelty", cn:"新奇", color:"gold"},
+  {en:"novice", cn:"新手", color:"gold"},
+  {en:"noxious", cn:"有害的", color:"gold"},
+  {en:"nude", cn:"裸体的", color:"gold"},
+  {en:"numb", cn:"麻木的", color:"gold"},
+  {en:"oar", cn:"桨", color:"gold"},
+  {en:"oasis", cn:"绿洲", color:"gold"},
+  {en:"oath", cn:"誓言", color:"gold"},
+  {en:"omit", cn:"省略/遗漏", color:"gold"},
+  {en:"omnipotent", cn:"全能的", color:"gold"},
+  {en:"opium", cn:"鸦片", color:"gold"},
+  {en:"pester", cn:"纠缠/烦扰", color:"gold"},
+  {en:"pessimism", cn:"悲观", color:"gold"},
+  {en:"physiological", cn:"生理的", color:"gold"},
+  {en:"pilgrimage", cn:"朝圣", color:"gold"},
+  {en:"plank", cn:"厚木板", color:"gold"},
+  {en:"plateau", cn:"高原/平稳状态", color:"gold"},
+  {en:"platinum", cn:"白金", color:"gold"},
+  {en:"platitude", cn:"陈词滥调", color:"gold"},
+  {en:"plausible", cn:"貌似合理的", color:"gold"},
+  {en:"pledge", cn:"承诺/保证", color:"gold"},
+  {en:"pliable", cn:"柔韧的", color:"gold"},
+  {en:"plight", cn:"困境", color:"gold"},
+  {en:"ploy", cn:"花招/策略", color:"gold"},
+  {en:"plumb", cn:"铅锤", color:"gold"},
+  {en:"plunge", cn:"跌落/投入", color:"gold"},
+  {en:"poignant", cn:"令人伤心的/深刻的", color:"gold"},
+  {en:"poise", cn:"平衡/姿态", color:"gold"},
+  {en:"pollen", cn:"花粉", color:"gold"},
+  {en:"pompous", cn:"浮华的", color:"gold"},
+  {en:"ponderous", cn:"笨重的", color:"gold"},
+  {en:"qualify", cn:"使具有资格", color:"gold"},
+  {en:"qualitative", cn:"定性的", color:"gold"},
+  {en:"quarantine", cn:"检疫/隔离", color:"gold"},
+  {en:"quaint", cn:"新奇有趣的", color:"gold"},
+  {en:"replenish", cn:"补充", color:"gold"},
+  {en:"replete", cn:"充满的", color:"gold"},
+  {en:"renaissance", cn:"复兴", color:"gold"},
+  {en:"renovation", cn:"革新/修缮", color:"gold"},
+  {en:"representation", cn:"表现/代表", color:"gold"},
+  {en:"repression", cn:"镇压/压抑", color:"gold"},
+  {en:"reprimand", cn:"训斥", color:"gold"},
+  {en:"reproach", cn:"责备", color:"gold"},
+  {en:"reptile", cn:"爬行动物", color:"gold"},
+  {en:"repulsive", cn:"令人厌恶的", color:"gold"},
+  {en:"reservoir", cn:"水库", color:"gold"},
+  {en:"residue", cn:"残余/剩余物", color:"gold"},
+  {en:"resilient", cn:"韧性强的", color:"gold"},
+  {en:"solicit", cn:"请求/征求", color:"gold"},
+  {en:"solidarity", cn:"团结", color:"gold"},
+  {en:"solvent", cn:"溶剂", color:"gold"},
+  {en:"sonata", cn:"奏鸣曲", color:"gold"},
+  {en:"soothe", cn:"安慰/缓和", color:"gold"},
+  {en:"souvenir", cn:"纪念品", color:"gold"},
+  {en:"spacious", cn:"宽敞的", color:"gold"},
+  {en:"sparse", cn:"稀疏的", color:"gold"},
+  {en:"spawn", cn:"卵/产卵", color:"gold"},
+  {en:"spectrum", cn:"光谱", color:"gold"},
+  {en:"spill", cn:"溢出", color:"gold"},
+  {en:"sporadic", cn:"零星的", color:"gold"},
+  {en:"spotlight", cn:"聚光灯/焦点", color:"gold"},
+  {en:"sprawl", cn:"蔓延/爬行", color:"gold"},
+  {en:"sprout", cn:"发芽/涌现", color:"gold"},
+  {en:"stabilise", cn:"使稳定", color:"gold"},
+  {en:"stellar", cn:"一流的", color:"gold"},
+  {en:"strangle", cn:"勒死/扼杀", color:"gold"},
+  {en:"stumble", cn:"绊倒", color:"gold"},
+  {en:"stunt", cn:"阻碍/抑制", color:"gold"},
+  {en:"subdue", cn:"使屈服/镇压", color:"gold"},
+  {en:"subordinate", cn:"次要的/使从属", color:"gold"},
+  {en:"substantiate", cn:"证实", color:"gold"},
+  {en:"succession", cn:"连续/接替", color:"gold"},
+  {en:"supersede", cn:"取代", color:"gold"},
+  {en:"superstructure", cn:"上层建筑", color:"gold"},
+  {en:"synchronise", cn:"同步", color:"gold"},
+  {en:"syndicate", cn:"财团/联合", color:"gold"},
+  {en:"synthetic", cn:"合成的", color:"gold"},
+  {en:"taboo", cn:"禁忌", color:"gold"},
+  {en:"tacit", cn:"心照不宣的", color:"gold"},
+  {en:"tack", cn:"大头钉/改变航向", color:"gold"},
+  {en:"traitor", cn:"叛国者", color:"gold"},
+  {en:"tranquil", cn:"宁静的", color:"gold"},
+  {en:"transcript", cn:"副本/成绩单", color:"gold"},
+  {en:"transient", cn:"短暂的", color:"gold"},
+  {en:"venerate", cn:"崇敬", color:"gold"},
+  {en:"veteran", cn:"老兵/老手", color:"gold"},
+  {en:"vibrant", cn:"生机勃勃的", color:"gold"},
+  {en:"visionary", cn:"有远见的", color:"gold"},
+  // Story 12 — Indigo
+  {en:"warden", cn:"看守人", color:"indigo"},
+  {en:"warranty", cn:"保证/保修", color:"indigo"},
+  {en:"warrior", cn:"战士", color:"indigo"},
+  {en:"unreliable", cn:"不可靠的", color:"indigo"},
+  {en:"unveil", cn:"揭开/公布", color:"indigo"},
+  {en:"uproar", cn:"骚动", color:"indigo"},
+  // Supplementary — missing words found during verification
+  {en:"gadget", cn:"精巧的小器械", color:"gold"},
+  {en:"gait", cn:"步态/步法", color:"gold"},
+  {en:"galaxy", cn:"星系/银河", color:"gold"},
+  {en:"gall", cn:"胆汁/怨恨", color:"gold"},
+  {en:"garb", cn:"打扮/装束", color:"gold"},
+  {en:"granite", cn:"花岗岩", color:"gold"},
+  {en:"grass-roots", cn:"民间的/基层的", color:"gold"},
+  {en:"grid", cn:"格子/栅格/网格", color:"gold"},
+  {en:"hinge", cn:"铰链/枢纽", color:"gold"},
+  {en:"proliferate", cn:"激增/增殖", color:"gold"},
+  {en:"quell", cn:"镇压/平息", color:"gold"},
+  {en:"quench", cn:"熄灭/扑灭", color:"gold"},
+  {en:"refundable", cn:"可退费的", color:"gold"},
+  {en:"refute", cn:"驳倒/反驳", color:"gold"},
+  {en:"regardless", cn:"不管/不顾", color:"gold"},
+  {en:"dilemma", cn:"窘境/困境", color:"gold"},
+  {en:"ephemeral", cn:"短暂的/瞬息的", color:"gold"},
+  {en:"escalate", cn:"逐步上升/增强", color:"gold"},
+  {en:"fetch", cn:"取来/拿来/请来", color:"gold"},
+  {en:"flake", cn:"薄片/剥落", color:"gold"},
+  {en:"fraud", cn:"欺骗/欺诈行为", color:"gold"},
+  {en:"heap", cn:"堆/堆积", color:"gold"},
+  {en:"heave", cn:"用力举起/扔", color:"gold"},
+  {en:"indecent", cn:"下流的/不得体的", color:"gold"},
+  {en:"artery", cn:"动脉/要道", color:"gold"},
+  {en:"hilarious", cn:"欢闹的/滑稽的", color:"gold"},
+  {en:"indefinite", cn:"模糊的/不确定的", color:"gold"},
+  {en:"indemnity", cn:"保障/赔偿/赔款", color:"gold"},
+  {en:"indicative", cn:"指示的/预示的", color:"gold"},
+  {en:"indigestion", cn:"消化不良/不能理解", color:"gold"},
+  {en:"inflation", cn:"通货膨胀", color:"gold"},
+  {en:"ingenious", cn:"机灵的/有独创性的", color:"gold"},
+  {en:"inhabitant", cn:"居民/居住者", color:"gold"},
+  {en:"inhibit", cn:"阻止/抑制/约束", color:"gold"},
+  {en:"innate", cn:"先天的/天生的", color:"gold"},
+  {en:"insane", cn:"患精神病的/疯狂的", color:"gold"},
+  {en:"lament", cn:"为…悲痛/痛惜", color:"gold"},
+  {en:"landslide", cn:"山崩/崩塌的泥石", color:"gold"},
+  {en:"lapse", cn:"小错/流逝/失效", color:"gold"},
+  {en:"legitimate", cn:"合法的/合理的", color:"gold"},
+  {en:"lime", cn:"酸橙/石灰", color:"gold"},
+  {en:"linear", cn:"直线的/线性的", color:"gold"},
+  {en:"linen", cn:"亚麻布/亚麻制品", color:"gold"},
+  {en:"retaliation", cn:"报复/报仇", color:"gold"},
+  {en:"lotus", cn:"荷花/莲花", color:"gold"},
+  {en:"monologue", cn:"独白/独角戏", color:"gold"},
+  {en:"mortgage", cn:"抵押/按揭", color:"gold"},
+  {en:"delude", cn:"欺骗/哄骗", color:"gold"},
+  {en:"demanding", cn:"要求多的/吃力的", color:"gold"},
+  {en:"demolish", cn:"拆毁/废除/驳倒", color:"gold"},
+  {en:"denial", cn:"否认/否定/拒绝", color:"gold"},
+  {en:"denote", cn:"指示/象征/表示", color:"gold"},
+  {en:"doleful", cn:"悲哀的/阴沉的", color:"gold"},
+  {en:"dolphin", cn:"海豚", color:"gold"},
+  {en:"domain", cn:"领土/领域/范围", color:"gold"},
+  {en:"dome", cn:"圆屋顶/穹顶", color:"gold"},
+  {en:"donate", cn:"捐赠/赠送", color:"gold"},
+  {en:"aspiration", cn:"强烈愿望/志向/抱负", color:"gold"},
+  {en:"atrocious", cn:"残暴的/凶恶的/恶劣的", color:"gold"},
+  {en:"imitation", cn:"模仿/冒充/赝品", color:"gold"},
+  {en:"immerse", cn:"沉浸/陷入/专心", color:"gold"},
+  {en:"immoral", cn:"不道德的/邪恶的", color:"gold"},
+  {en:"immune", cn:"免疫的/不受影响的", color:"gold"},
+  {en:"instalment", cn:"部分/分期付款", color:"gold"},
+  {en:"instantaneous", cn:"瞬间的/即刻的/即时的", color:"gold"},
+  {en:"instructive", cn:"有益的/教育性的", color:"gold"},
+  {en:"instrumental", cn:"有帮助的/起作用的", color:"gold"},
+  {en:"insulate", cn:"绝缘/隔离/隔热", color:"gold"},
+  {en:"lobster", cn:"龙虾", color:"gold"},
+  {en:"locomotive", cn:"机车/火车头", color:"gold"},
+  {en:"lodge", cn:"小屋/寄宿/暂住", color:"gold"},
+  {en:"loft", cn:"阁楼", color:"gold"},
+  {en:"logistics", cn:"后勤学/后勤/物流", color:"gold"},
+  {en:"magnetic", cn:"有磁性的/有吸引力的", color:"gold"},
+  {en:"ubiquitous", cn:"到处存在的/普遍存在的", color:"gold"},
+  {en:"ultrasonic", cn:"超声波/超音速的", color:"gold"},
+  {en:"unaccountable", cn:"无法解释的/不负责任的", color:"gold"},
+  {en:"windfall", cn:"横财/意外之财", color:"gold"},
+  {en:"wither", cn:"凋谢/消亡/枯萎", color:"gold"},
+  {en:"withhold", cn:"拒绝给/阻挡/阻止", color:"gold"},
+  {en:"withstand", cn:"抵挡/经受住", color:"gold"},
+  {en:"stroll", cn:"漫步/闲逛", color:"gold"},
+  {en:"stun", cn:"震惊/目瞪口呆", color:"gold"},
+  {en:"fleeting", cn:"短暂的/飞逝的", color:"gold"},
+  {en:"flux", cn:"涨潮/变迁", color:"gold"},
+  {en:"foil", cn:"箔/金属薄片", color:"gold"},
+  {en:"foresight", cn:"远见/深谋远虑", color:"gold"},
+  {en:"forfeit", cn:"罚款/没收/丧失", color:"gold"},
+  {en:"forsake", cn:"放弃/抛弃/背弃", color:"gold"},
+  {en:"gobble", cn:"狼吞虎咽/贪婪地抓住", color:"gold"},
+  {en:"gorge", cn:"咽喉/峡谷/作呕", color:"gold"},
+  {en:"gorilla", cn:"大猩猩", color:"gold"},
+  {en:"gossip", cn:"闲话/闲聊/流言", color:"gold"},
+  {en:"gratitude", cn:"感激/感谢/感恩", color:"gold"},
+  {en:"grease", cn:"动物脂肪/油脂/涂油脂", color:"gold"},
+  {en:"haul", cn:"用力拉/拖/硬拖", color:"gold"},
+  {en:"havoc", cn:"大灾难/浩劫", color:"gold"},
+  {en:"haze", cn:"薄雾/迷糊/使朦胧", color:"gold"},
+  {en:"hierarchy", cn:"层次/层级/等级制度", color:"gold"},
+  {en:"hijack", cn:"抢劫/劫持/劫机", color:"gold"},
+  {en:"hike", cn:"远足/步行", color:"gold"},
+  {en:"adore", cn:"崇拜/热爱/喜爱", color:"gold"},
+  {en:"adornment", cn:"装饰/装饰品", color:"gold"},
+  {en:"benign", cn:"良性的/仁慈的/温和的", color:"gold"},
+  {en:"clarify", cn:"澄清/阐明/使清楚", color:"gold"},
+  {en:"deft", cn:"灵巧的/熟练的", color:"gold"},
+  {en:"demise", cn:"死亡/终止/倒闭", color:"gold"},
+  {en:"emulate", cn:"模仿/效仿/努力赶上", color:"gold"},
+  {en:"flamboyant", cn:"艳丽的/浮夸的/炫耀的", color:"gold"},
+  {en:"gauge", cn:"测量/评估/判断", color:"gold"},
+  {en:"impudent", cn:"无礼的/厚颜无耻的", color:"gold"},
+  {en:"indigenous", cn:"本土的/土著的/天生的", color:"gold"},
+  {en:"jeopardise", cn:"危及/损害/使受危险", color:"gold"},
+  {en:"obsolete", cn:"过时的/淘汰的/废弃的", color:"gold"},
+  {en:"pastime", cn:"消遣/娱乐", color:"gold"},
+  {en:"recession", cn:"经济衰退/退后", color:"gold"},
+  {en:"recreation", cn:"娱乐/消遣/休闲活动", color:"gold"},
+  {en:"redemption", cn:"赎回/偿还/拯救", color:"gold"},
+  {en:"serenity", cn:"平静/宁静/安静", color:"gold"},
+  {en:"shirk", cn:"逃避/推卸", color:"gold"},
+  {en:"shun", cn:"避开/避免", color:"gold"},
+  {en:"abbreviate", cn:"缩写/缩短/简化", color:"gold"},
+  {en:"aboriginal", cn:"土著居民/土著的", color:"gold"},
+  {en:"abscond", cn:"潜逃/逃亡", color:"gold"},
+  {en:"affront", cn:"公开侮辱/轻蔑/冒犯", color:"gold"},
+  {en:"aggregate", cn:"聚集/集合/合计", color:"gold"},
+  {en:"aggressive", cn:"侵略的/进攻性的/好斗的", color:"gold"},
+  {en:"agile", cn:"敏捷的/轻快的/灵活的", color:"gold"},
+  {en:"agitate", cn:"搅动/鼓动/煽动/激烈辩论", color:"gold"},
+  {en:"columnist", cn:"专栏作家", color:"gold"},
+  {en:"combustion", cn:"燃烧/烧毁", color:"gold"},
+  {en:"comic", cn:"滑稽演员/滑稽的/喜剧的", color:"gold"},
+  {en:"commemorate", cn:"纪念/怀念", color:"gold"},
+  {en:"commence", cn:"开始/着手", color:"gold"},
+  {en:"commute", cn:"通勤/交换", color:"gold"},
+  {en:"comparable", cn:"可比较的/比得上的", color:"gold"},
+  {en:"compartment", cn:"间隔间/车厢", color:"gold"},
+  {en:"deplete", cn:"耗尽/衰竭", color:"gold"},
+  {en:"depreciate", cn:"折旧/贬值", color:"gold"},
+  {en:"designate", cn:"标出/指明/任命/指派", color:"gold"},
+  {en:"despicable", cn:"可鄙的/卑劣的/可耻的", color:"gold"},
+  {en:"detergent", cn:"清洁剂/去垢剂/洗涤剂", color:"gold"},
+  {en:"deteriorate", cn:"恶化/退化/质量下降", color:"gold"},
+  {en:"devastate", cn:"彻底破坏/摧毁", color:"gold"},
+  {en:"division", cn:"划分/分开/除法/部门", color:"gold"},
+  {en:"perspire", cn:"出汗/流汗/分泌", color:"gold"},
+  {en:"propulsion", cn:"推进/推进力", color:"gold"},
+  {en:"prospectus", cn:"创立计划书/说明书/简介", color:"gold"},
+  {en:"puncture", cn:"刺穿/刺破", color:"gold"},
+  {en:"pundit", cn:"权威人士/专家", color:"gold"},
+  {en:"pungent", cn:"刺鼻的/尖锐的/刻薄的", color:"gold"},
+  {en:"recur", cn:"再发生/重新/反复出现", color:"gold"},
+  {en:"redundant", cn:"多余的/累赘的", color:"gold"},
+  {en:"reed", cn:"芦苇/芦笛/簧片", color:"gold"},
+  {en:"reef", cn:"暗礁/礁", color:"gold"},
+  {en:"refund", cn:"退还/偿还", color:"gold"},
+  {en:"rehabilitate", cn:"身体康复/复职/复原/复兴", color:"gold"},
+  {en:"rehearsal", cn:"排演/演习/预演", color:"gold"},
+  {en:"reimburse", cn:"偿还/归还", color:"gold"},
+  {en:"relish", cn:"美味/乐趣/欣赏/享受", color:"gold"},
+  {en:"divorce", cn:"离婚/分离", color:"gold"},
+  {en:"doubtless", cn:"无疑的/肯定的", color:"gold"},
+  {en:"dwindle", cn:"逐渐变小/减少", color:"gold"},
+  {en:"endow", cn:"捐赠/赋予/给予", color:"gold"},
+  {en:"engaging", cn:"吸引人的/迷人的/有魅力的", color:"gold"},
+  {en:"engrave", cn:"雕刻/使铭记/铭刻", color:"gold"},
+  {en:"enigma", cn:"谜/不可思议的东西", color:"gold"},
+  {en:"enlargement", cn:"放大/扩大/增补物", color:"gold"},
+  {en:"eventually", cn:"最后/终于", color:"gold"},
+  {en:"exceptional", cn:"杰出的/异常的/特别的", color:"gold"},
+  {en:"flexibility", cn:"灵活性/弹性", color:"gold"},
+  {en:"flint", cn:"打火石/燧石/极硬的东西", color:"gold"},
+  {en:"flock", cn:"羊群/禽群/大量", color:"gold"},
+  {en:"flora", cn:"植物群/植物区系", color:"gold"},
+  {en:"fluent", cn:"流利的/流畅的", color:"gold"},
+  {en:"flutter", cn:"振翼/颤动/不规则跳动", color:"gold"},
+  {en:"formulate", cn:"规划/用公式表示/系统地阐述", color:"gold"},
+  {en:"glamour", cn:"魔力/魅力", color:"gold"},
+  {en:"serpent", cn:"大毒蛇/阴险的人", color:"gold"},
+  {en:"servile", cn:"奴隶的/奴性的/卑屈的", color:"gold"},
+  {en:"sewer", cn:"下水道/缝纫者", color:"gold"},
+  {en:"shackle", cn:"脚镣/束缚/阻碍", color:"gold"},
+  {en:"shamble", cn:"蹒跚/踉跄/摇晃不稳", color:"gold"},
+  {en:"shove", cn:"推挤/猛推", color:"gold"},
+  {en:"shrug", cn:"耸肩", color:"gold"},
+  {en:"oscillate", cn:"摆动/波动/踌躇", color:"gold"},
+  {en:"ostentation", cn:"卖弄/虚饰/炫耀", color:"gold"},
+  {en:"palette", cn:"调色板/颜料", color:"gold"},
+  {en:"pendulum", cn:"钟摆/摇摆不定的事态", color:"gold"},
+  {en:"penguin", cn:"企鹅", color:"gold"},
+  {en:"peninsula", cn:"半岛", color:"gold"},
+  {en:"pentagon", cn:"五角形/五边形", color:"gold"},
+  {en:"perdition", cn:"毁灭/灭亡", color:"gold"},
+  {en:"perennial", cn:"长期的/终年的", color:"gold"},
+  {en:"periodical", cn:"期刊/杂志/周期的/定期的", color:"gold"},
+  {en:"periphery", cn:"外围/周围/边缘", color:"gold"},
+  {en:"perishable", cn:"易腐烂之物/易坏的/易腐烂的", color:"gold"},
+  {en:"permeate", cn:"弥漫/渗透/透入", color:"gold"},
+  {en:"perpetuate", cn:"永存/不朽", color:"gold"},
+  {en:"persecute", cn:"迫害/困扰", color:"gold"},
+  {en:"persecution", cn:"迫害/困扰", color:"gold"},
+  {en:"persevere", cn:"坚持/不屈不挠", color:"gold"},
+  {en:"perspiration", cn:"出汗/汗水", color:"gold"},
+  {en:"agony", cn:"苦恼/极大的痛苦", color:"gold"},
+  {en:"ailment", cn:"疾病/小病/不安", color:"gold"},
+  {en:"aisle", cn:"走廊/过道", color:"gold"},
+  {en:"akin", cn:"同族的/类似的", color:"gold"},
+  {en:"alien", cn:"外侨/外国的/相异的/异国的", color:"gold"},
+  {en:"alienation", cn:"疏远/转让", color:"gold"},
+  {en:"align", cn:"排列/结盟/排成一线", color:"gold"},
+  {en:"allege", cn:"宣称/断言/辩护", color:"gold"},
+  {en:"allergy", cn:"过敏/过敏反应", color:"gold"},
+  {en:"alleviate", cn:"减轻/缓和/使易于忍受", color:"gold"},
+  {en:"allocation", cn:"分配/安置", color:"gold"},
+  {en:"alloy", cn:"合金", color:"gold"},
+  {en:"applicable", cn:"可适用的/可应用的", color:"gold"},
+  {en:"appointment", cn:"约会/指定/预约/任命", color:"gold"},
+  {en:"ascertain", cn:"确定/查明/探知", color:"gold"},
+  {en:"besiege", cn:"围困/围攻/包围", color:"gold"},
+  {en:"beverage", cn:"饮料", color:"gold"},
+  {en:"bewilder", cn:"迷惑/不知所措", color:"gold"},
+  {en:"redeem", cn:"挽回/赎回", color:"gold"},
+  {en:"rehabilitation", cn:"康复/修复/复原/复兴", color:"gold"},
+  {en:"rejoice", cn:"欣喜/高兴/喜悦", color:"gold"},
+  {en:"relate", cn:"叙述/联系", color:"gold"},
+  {en:"relationship", cn:"关系/联系/亲属关系", color:"gold"},
+  {en:"relentless", cn:"无情的/残酷的/不断的/不懈的", color:"gold"},
+  {en:"saturate", cn:"饱和/浸透/充满", color:"gold"},
+  {en:"savour", cn:"味道/滋味/品味/品尝/调味", color:"gold"},
+  {en:"scalpel", cn:"手术刀/解剖刀", color:"gold"},
+  {en:"segregation", cn:"种族隔离/分离/隔离", color:"gold"},
+  {en:"seismic", cn:"地震的/由地震引起的", color:"gold"},
+  {en:"semiconductor", cn:"半导体", color:"gold"},
+  {en:"sensational", cn:"极好的/轰动的", color:"gold"},
+  {en:"sentiment", cn:"情绪/观点/感情", color:"gold"},
+  {en:"infancy", cn:"婴儿期/幼年/初期", color:"gold"},
+  {en:"infest", cn:"大批出没/成群出现/遍布", color:"gold"},
+  {en:"jumble", cn:"混杂/搞乱", color:"gold"},
+  {en:"junction", cn:"连接/交叉点/汇合处", color:"gold"},
+  {en:"junk", cn:"垃圾/便宜货/丢弃/废弃", color:"gold"},
+  {en:"Jupiter", cn:"木星", color:"gold"},
+  {en:"juvenile", cn:"青少年/青少年的/幼稚的", color:"gold"},
+  {en:"kindergarten", cn:"幼儿园", color:"gold"},
+  {en:"knack", cn:"诀窍/高明的本领", color:"gold"},
+  {en:"lethal", cn:"致命的/致死的", color:"gold"},
+  {en:"lever", cn:"杆/杠杆/工具/手段/抬起", color:"gold"},
+  {en:"leverage", cn:"杠杆作用/影响力", color:"gold"},
+  {en:"liaison", cn:"联络/联络人", color:"gold"},
+  {en:"likelihood", cn:"可能/可能性", color:"gold"},
+  {en:"marital", cn:"婚姻的", color:"gold"},
+  {en:"mattress", cn:"床垫", color:"gold"},
+  {en:"reminiscence", cn:"回想/回忆/记忆力", color:"gold"},
+  {en:"reminiscent", cn:"回忆者/怀旧的/引人联想的", color:"gold"},
+  {en:"rendezvous", cn:"约会/集会/聚会地点/汇合/集合", color:"gold"},
+  {en:"satire", cn:"讽刺文学/讽刺", color:"gold"},
+  {en:"satisfactory", cn:"令人满意的", color:"gold"},
+  {en:"scant", cn:"减缩/限制/忽略/缺乏的/不足的", color:"gold"},
+  {en:"scurry", cn:"快跑声/疾走/小步疾走/急匆匆地走", color:"gold"},
+  {en:"shanty", cn:"简陋的小屋/棚屋/棚户区", color:"gold"},
+  {en:"shimmer", cn:"微光/闪光/闪烁/发微光", color:"gold"},
+  {en:"shoal", cn:"鱼群/浅滩/沙洲/变浅", color:"gold"},
+  {en:"shred", cn:"碎片/细条/破布/撕碎/切丝", color:"gold"},
+  {en:"shutter", cn:"关闭物/百叶窗/快门", color:"gold"},
+  {en:"shuttle", cn:"往返汽车/列车/飞机/穿梭往返", color:"gold"},
+  {en:"siege", cn:"包围/围攻", color:"gold"},
+  {en:"sightseeing", cn:"观光/游览", color:"gold"},
+  {en:"significance", cn:"意义/重要性", color:"gold"},
+  {en:"signify", cn:"表示/预示/意味/象征", color:"gold"},
+  {en:"silicon", cn:"硅/硅元素", color:"gold"},
+  {en:"simulate", cn:"模拟/模仿/假装", color:"gold"},
+  {en:"inaugural", cn:"就职演说的/就职的/开始的", color:"gold"},
+  {en:"incentive", cn:"诱因/动机/刺激/鼓励/奖励", color:"gold"},
+  {en:"indicator", cn:"指示器/指标", color:"gold"},
+  {en:"inference", cn:"推论/推理/推断", color:"gold"},
+  {en:"infringe", cn:"触犯/违反/侵害", color:"gold"},
+  {en:"insomnia", cn:"失眠/失眠症", color:"gold"},
+  {en:"interim", cn:"间歇/过渡时期/暂时的/临时的", color:"gold"},
+  {en:"jade", cn:"玉石/翡翠", color:"gold"},
+  {en:"jerk", cn:"急推/猛拉", color:"gold"},
+  {en:"kangaroo", cn:"袋鼠", color:"gold"},
+  {en:"kerosene", cn:"煤油/火油", color:"gold"},
+  {en:"kidnap", cn:"诱拐/绑架", color:"gold"},
+  {en:"lavish", cn:"铺张的/奢华的", color:"gold"},
+  {en:"leak", cn:"泄露/漏洞/泄露/渗透", color:"gold"},
+  {en:"legislation", cn:"立法/法规", color:"gold"},
+  {en:"niche", cn:"舒适的工作/生活/目标", color:"gold"},
+  {en:"observatory", cn:"天文台/气象台", color:"gold"},
+  {en:"obsession", cn:"着魔/萦绕/着迷", color:"gold"},
+  {en:"ostrich", cn:"鸵鸟/逃避现实的人", color:"gold"},
+  {en:"outcry", cn:"喊叫/强烈抗议", color:"gold"},
+  {en:"outlaw", cn:"罪犯/违法/不合法/禁止", color:"gold"},
+  {en:"outright", cn:"直率的/完全的/彻底的", color:"gold"},
+  {en:"outstrip", cn:"超过/胜过/跑过", color:"gold"},
+  {en:"outweigh", cn:"比…重要/比…有价值", color:"gold"},
+  {en:"palatable", cn:"可口的/美味的/称心如意的", color:"gold"},
+  {en:"palate", cn:"上颚/味觉/趣味", color:"gold"},
+  {en:"parrot", cn:"鹦鹉/学舌者/机械地模仿", color:"gold"},
+  {en:"particle", cn:"颗粒/微粒/粒子/微量", color:"gold"},
+  {en:"partition", cn:"分割/分割物/划分", color:"gold"},
+  {en:"patriot", cn:"爱国者/爱国主义者", color:"gold"},
+  {en:"patron", cn:"赞助人/资助人/守护神", color:"gold"},
+  {en:"pebble", cn:"小鹅卵石", color:"gold"},
+  {en:"pedagogy", cn:"教学/教授/教育学", color:"gold"},
+  {en:"leopard", cn:"豹/金钱豹", color:"gold"},
+  {en:"loom", cn:"织布机/隐约可见/逼近", color:"gold"},
+  {en:"lucid", cn:"明白易懂的/清晰的/神智清醒的", color:"gold"},
+  {en:"marine", cn:"海的/航海的/海产的", color:"gold"},
+  {en:"marrow", cn:"脊髓/骨髓/精华", color:"gold"},
+  {en:"marshland", cn:"沼泽地", color:"gold"},
+  {en:"martyr", cn:"烈士/殉教者/杀害/折磨", color:"gold"},
+  {en:"masculine", cn:"男性的/男子气概的/阳刚的", color:"gold"},
+  {en:"mason", cn:"泥瓦匠", color:"gold"},
+  {en:"measurement", cn:"测量/尺寸/大小/衡量", color:"gold"},
+  {en:"modernisation", cn:"现代化", color:"gold"},
+  {en:"negligence", cn:"疏忽/粗心大意/渎职", color:"gold"},
+  {en:"negotiable", cn:"可协商的/可转让的/可通行的", color:"gold"},
+  {en:"neutral", cn:"中立者/中立国/中立的", color:"gold"},
+  {en:"neutralise", cn:"中立/使无效/中和", color:"gold"},
+  {en:"nibble", cn:"一点一点地咬", color:"gold"},
+  {en:"sin", cn:"原罪/错误", color:"gold"},
+  {en:"sinister", cn:"不祥的/危险的/邪恶的", color:"gold"},
+  {en:"sip", cn:"吮吸/啜饮", color:"gold"},
+  {en:"siren", cn:"汽笛/警报/妖妇", color:"gold"},
+  {en:"skull", cn:"头脑/头骨", color:"gold"},
+  {en:"starvation", cn:"饥饿/饥荒", color:"gold"},
+  {en:"stature", cn:"身高/才能/声望", color:"gold"},
+  {en:"statute", cn:"法令/法规/章程/条例", color:"gold"},
+  {en:"tide", cn:"潮汐/潮流", color:"gold"},
+  {en:"timidity", cn:"胆小/胆怯/害羞", color:"gold"},
+  {en:"tiptoe", cn:"脚尖/踮着脚走/踮着脚的", color:"gold"},
+  {en:"tissue", cn:"薄纸/棉纸/组织", color:"gold"},
+  {en:"toad", cn:"蟾蜍/癞蛤蟆/讨厌的家伙", color:"gold"},
+  {en:"torment", cn:"痛苦/苦恼/折磨", color:"gold"},
+  {en:"traction", cn:"拽/牵引/牵引力", color:"gold"},
+  {en:"tramp", cn:"流浪汉/徒步/跋涉/流浪", color:"gold"},
+  {en:"unravel", cn:"解开/揭示/解决/拆散", color:"gold"},
+  {en:"unruly", cn:"不受拘束的/不守规矩的/蛮横的", color:"gold"},
+  {en:"pedestrian", cn:"步行者/行人", color:"gold"},
+  {en:"pelt", cn:"剥皮/投掷/投击", color:"gold"},
+  {en:"pendant", cn:"垂饰/吊坠/挂件", color:"gold"},
+  {en:"pertain", cn:"关于/从属/适合", color:"gold"},
+  {en:"pertinent", cn:"中肯的/相关的/恰当的", color:"gold"},
+  {en:"proponent", cn:"支持者/拥护者", color:"gold"},
+  {en:"proposition", cn:"主张/建议/陈述/命题", color:"gold"},
+  {en:"propriety", cn:"正当/适当/得体", color:"gold"},
+  {en:"punishment", cn:"惩罚", color:"gold"},
+  {en:"purge", cn:"清洗/清理/泻药/净化/清除", color:"gold"},
+  {en:"quarry", cn:"采石场/猎获物/来源/挖出/费力搜寻", color:"gold"},
+  {en:"quartz", cn:"石英", color:"gold"},
+  {en:"ragged", cn:"粗糙的/衣衫褴褛的/破烂的", color:"gold"},
+  {en:"ramble", cn:"漫游/漫谈", color:"gold"},
+  {en:"rampant", cn:"猖獗的/蔓延的/猛烈的", color:"gold"},
+  {en:"reception", cn:"接待/招待会/前台/接收", color:"gold"},
+  {en:"rectify", cn:"矫正/调整", color:"gold"},
+  {en:"upheaval", cn:"剧变/动乱", color:"gold"},
+  {en:"variance", cn:"不一致/差异/分歧", color:"gold"},
+  {en:"variant", cn:"变体/变异/不同的", color:"gold"},
+  {en:"varnish", cn:"清漆/掩饰/上漆/修饰", color:"gold"},
+  {en:"vendor", cn:"卖主/供应商", color:"gold"},
+  {en:"venomous", cn:"恶意的/有毒的", color:"gold"},
+  {en:"vibration", cn:"震动/颤动/共鸣", color:"gold"},
+  {en:"vindicate", cn:"为…辩白/证明…正确/维护", color:"gold"},
+  {en:"viper", cn:"毒蛇/毒蛇般的人", color:"gold"},
+  {en:"zenith", cn:"顶点/顶峰", color:"gold"},
+  {en:"maverick", cn:"独来独往者/特立独行的/不遵守传统的", color:"gold"},
+  {en:"maxim", cn:"格言/座右铭/准则", color:"gold"},
+  {en:"meager", cn:"瘦的/不足的/贫乏的", color:"gold"},
+  {en:"mediation", cn:"仲裁/调停/调解", color:"gold"},
+  {en:"medieval", cn:"中世纪的/仿中世纪的/老式的", color:"gold"},
+  {en:"meditate", cn:"想/考虑/沉思/冥想", color:"gold"},
+  {en:"napkin", cn:"餐巾/手巾", color:"gold"},
+  {en:"nascent", cn:"新生的/尚不成熟的/尚不发达的", color:"gold"},
+  {en:"nausea", cn:"反胃/晕船/恶心", color:"gold"},
+  {en:"nomadic", cn:"游牧的/流浪的", color:"gold"},
+  {en:"nominal", cn:"名义上的/有名无实的", color:"gold"},
+  {en:"nominate", cn:"提名/推荐", color:"gold"},
+  {en:"obstinate", cn:"倔强的/顽固的", color:"gold"},
+  {en:"odds", cn:"可能性/几率/希望/胜算", color:"gold"},
+  {en:"odour", cn:"气味/名声", color:"gold"},
+  {en:"offset", cn:"弥补/抵消", color:"gold"},
+  {en:"originate", cn:"引起/发起/起源", color:"gold"},
+  {en:"bilingual", cn:"能说两种语言的/双语的", color:"gold"},
+  {en:"biochemistry", cn:"生物化学", color:"gold"},
+  {en:"biologist", cn:"生物学家", color:"gold"},
+  {en:"bizarre", cn:"奇异的/态度容貌款式等", color:"gold"},
+  {en:"bleach", cn:"漂白/漂白剂/变白", color:"gold"},
+  {en:"blouse", cn:"女式衬衫", color:"gold"},
+  {en:"bluff", cn:"虚张声势/吓唬", color:"gold"},
+  {en:"blunder", cn:"犯大错/大错/失误", color:"gold"},
+  {en:"calf", cn:"小牛/小牛皮/腿肚", color:"gold"},
+  {en:"calibration", cn:"调准/校准", color:"gold"},
+  {en:"canary", cn:"金丝雀", color:"gold"},
+  {en:"clutch", cn:"离合器/控制/一群/一窝/握紧/抓住", color:"gold"},
+  {en:"coax", cn:"哄诱/诱导", color:"gold"},
+  {en:"coefficient", cn:"系数/共同作用的", color:"gold"},
+  {en:"coherent", cn:"前后一致的/有条理的", color:"gold"},
+  {en:"colossal", cn:"巨大的/庞大的", color:"gold"},
+  {en:"gleam", cn:"微光/闪光/闪烁/隐约闪现", color:"gold"},
+  {en:"glitter", cn:"闪光/灿烂", color:"gold"},
+  {en:"gnaw", cn:"咬/消耗/折磨/侵蚀", color:"gold"},
+  {en:"goad", cn:"赶牲口用的刺棒/驱赶/刺激/激励", color:"gold"},
+  {en:"harassment", cn:"骚扰/困扰", color:"gold"},
+  {en:"harmonise", cn:"协调/和谐", color:"gold"},
+  {en:"harness", cn:"马具/安全带/上挽具/治理/利用", color:"gold"},
+  {en:"herd", cn:"兽群/牧群/放牧", color:"gold"},
+  {en:"heretic", cn:"异教徒/异端者", color:"gold"},
+  {en:"heterogeneous", cn:"不同种类的/异质的/异类的", color:"gold"},
+  {en:"hibernate", cn:"冬眠", color:"gold"},
+  {en:"indignity", cn:"侮辱/轻蔑/有伤尊严", color:"gold"},
+  {en:"indispensable", cn:"不可缺少的/绝对必要的", color:"gold"},
+  {en:"individualism", cn:"个人主义", color:"gold"},
+  {en:"indolent", cn:"懒惰的/不积极的", color:"gold"},
+  {en:"inductive", cn:"感应的/归纳的", color:"gold"},
+  {en:"indulge", cn:"纵容/溺爱", color:"gold"},
+  {en:"industrious", cn:"勤奋的/刻苦的", color:"gold"},
+  {en:"inept", cn:"无能的/不适当的", color:"gold"},
+  {en:"terrestrial", cn:"地球生物/地球的/陆地的", color:"gold"},
+  {en:"terse", cn:"说话文笔精炼的/简明的", color:"gold"},
+  {en:"tertiary", cn:"第三的/第三位的", color:"gold"},
+  {en:"testimony", cn:"证词/证明/证据", color:"gold"},
+  {en:"thrifty", cn:"节俭的/节约的", color:"gold"},
+  {en:"thrust", cn:"推力/冲/插入/猛推/猛拉", color:"gold"},
+  {en:"unearth", cn:"发掘/挖出/揭露", color:"gold"},
+  {en:"uniformity", cn:"一致/一致/均匀性", color:"gold"},
+  {en:"vantage", cn:"优势/有利情况/有利地位", color:"gold"},
+  {en:"variation", cn:"变化/变更/变异", color:"gold"},
+  {en:"wade", cn:"涉水/费力行走", color:"gold"},
+  {en:"wagon", cn:"四轮马车", color:"gold"},
+  {en:"waive", cn:"放弃/免除/搁置", color:"gold"},
+  {en:"yacht", cn:"游艇/帆船", color:"gold"},
+  {en:"zest", cn:"强烈的兴趣/热情/热心", color:"gold"},
+  {en:"zoology", cn:"动物学", color:"gold"},
+  {en:"zoom", cn:"飞机汽车急速移动/价格急升/猛涨", color:"gold"},
+  {en:"abstract", cn:"摘要/概要/抽象的", color:"gold"},
+  {en:"abstraction", cn:"提取/抽象概念", color:"gold"},
+  {en:"accuracy", cn:"准确性/正确性", color:"gold"},
+  {en:"adobe", cn:"砖坯/土砖", color:"gold"},
+  {en:"adolescent", cn:"青少年/青春期的/青春的", color:"gold"},
+  {en:"advent", cn:"出现/到来", color:"gold"},
+  {en:"adventurous", cn:"喜欢冒险的/充满危险的", color:"gold"},
+  {en:"advisable", cn:"可取的/明智的", color:"gold"},
+  {en:"aerial", cn:"空中的/航空的/天线", color:"gold"},
+  {en:"aerospace", cn:"宇宙空间/航天航空/宇宙空间的", color:"gold"},
+  {en:"aesthetics", cn:"美学/美术理论", color:"gold"},
+  {en:"affable", cn:"和蔼可亲的/友善的", color:"gold"},
+  {en:"affectation", cn:"假装/虚饰/做作", color:"gold"},
+  {en:"parachute", cn:"降落伞/用降落伞投送/空投", color:"gold"},
+  {en:"paradigm", cn:"范例/模范/模型/模式", color:"gold"},
+  {en:"paradox", cn:"似非而是的论点/悖论", color:"gold"},
+  {en:"paralyse", cn:"瘫痪/麻痹", color:"gold"},
+  {en:"parameter", cn:"参数/参量/界限/范围/起限定作用的因素", color:"gold"},
+  {en:"parasite", cn:"寄生虫/食客", color:"gold"},
+  {en:"perverse", cn:"任性的/违反常规的/行为反常的", color:"gold"},
+  {en:"predictable", cn:"可预言的/可预料的", color:"gold"},
+  {en:"preferable", cn:"更可取的/更好的", color:"gold"},
+  {en:"preference", cn:"偏爱/优先", color:"gold"},
+  {en:"prodigious", cn:"巨大的/惊人的/奇异的", color:"gold"},
+  {en:"prodigy", cn:"奇迹/奇才/神童", color:"gold"},
+  {en:"purity", cn:"纯净/纯洁/纯度", color:"gold"},
+  {en:"rash", cn:"轻率的/匆忙的/鲁莽的", color:"gold"},
+  {en:"ratify", cn:"批准/认可/签署", color:"gold"},
+  {en:"raven", cn:"大乌鸦/掠夺", color:"gold"},
+  {en:"rear", cn:"后面/培养/饲养/养育", color:"gold"},
+  {en:"rebound", cn:"回弹/反弹", color:"gold"},
+  {en:"decry", cn:"谴责/非难/贬抑", color:"gold"},
+  {en:"deductive", cn:"演绎的/推论的", color:"gold"},
+  {en:"defective", cn:"有缺陷的/不完善的/不完全的", color:"gold"},
+  {en:"defendant", cn:"被告/为自己辩护的", color:"gold"},
+  {en:"descendant", cn:"子孙/后裔", color:"gold"},
+  {en:"digression", cn:"离题/脱轨", color:"gold"},
+  {en:"dilate", cn:"张大/扩大/膨胀", color:"gold"},
+  {en:"elusive", cn:"逃避的/难以捉摸的/难以实现的", color:"gold"},
+  {en:"embargo", cn:"禁止出入港口/禁运", color:"gold"},
+  {en:"emblem", cn:"象征/徽章/符号/用象征表示", color:"gold"},
+  {en:"embroidery", cn:"刺绣品/刺绣", color:"gold"},
+  {en:"embryo", cn:"胚胎/胚胎的/初期的", color:"gold"},
+  {en:"emigrate", cn:"移民出境/侨居", color:"gold"},
+  {en:"explosion", cn:"爆炸/剧增", color:"gold"},
+  {en:"feasible", cn:"可行的/行得通的", color:"gold"},
+  {en:"feign", cn:"假装/装作/捏造", color:"gold"},
+  {en:"flax", cn:"亚麻/麻布/亚麻织品", color:"gold"},
+  {en:"fortify", cn:"设防于/增强", color:"gold"},
+  {en:"fragrance", cn:"香味/香气", color:"gold"},
+  {en:"frail", cn:"脆弱的/虚弱的/易损坏的", color:"gold"},
+  {en:"generalise", cn:"归纳/概括", color:"gold"},
+  {en:"genesis", cn:"起源/发生", color:"gold"},
+  {en:"genetics", cn:"遗传学", color:"gold"},
+  {en:"giggle", cn:"傻笑", color:"gold"},
+  {en:"grievance", cn:"委屈/冤情", color:"gold"},
+  {en:"grumble", cn:"怨言/牢骚/轰鸣", color:"gold"},
+  {en:"hallowed", cn:"神圣化的/神圣的", color:"gold"},
+  {en:"handicap", cn:"障碍/阻碍", color:"gold"},
+  {en:"haphazard", cn:"偶然/偶然的/无计划的/杂乱无章的", color:"gold"},
+  {en:"helicopter", cn:"直升机", color:"gold"},
+  {en:"herald", cn:"使者/传令官/传达/预报", color:"gold"},
+  {en:"herb", cn:"药草/香草", color:"gold"},
+  {en:"ferment", cn:"酵素/发酵剂/发酵/激动", color:"gold"},
+  {en:"ferocious", cn:"强烈的/凶猛的/严重的", color:"gold"},
+  {en:"ferocity", cn:"凶猛/残忍/暴行", color:"gold"},
+  {en:"feud", cn:"宿敌/部落或家族间的世仇", color:"gold"},
+  {en:"fidelity", cn:"忠实/忠诚/虔诚", color:"gold"},
+  {en:"fret", cn:"烦躁/磨损/焦急", color:"gold"},
+  {en:"frugal", cn:"节俭的/省钱的", color:"gold"},
+  {en:"fruitful", cn:"多产的/富有成效的", color:"gold"},
+  {en:"gangster", cn:"歹徒/流氓/强盗", color:"gold"},
+  {en:"gaol", cn:"监狱/拘留所/监禁", color:"gold"},
+  {en:"garage", cn:"车库/汽车修理站", color:"gold"},
+  {en:"gasoline", cn:"汽油", color:"gold"},
+  {en:"guise", cn:"外观/伪装", color:"gold"},
+  {en:"gymnasium", cn:"体育馆/健身房", color:"gold"},
+  {en:"habitat", cn:"产地/栖息地/居留地", color:"gold"},
+  {en:"hacker", cn:"电脑黑客", color:"gold"},
+  {en:"hail", cn:"冰雹/下冰雹/欢呼", color:"gold"},
+  {en:"hallmark", cn:"特点/标志", color:"gold"},
+  {en:"rebuke", cn:"指责/谴责/非难", color:"gold"},
+  {en:"remittance", cn:"汇款/汇款额", color:"gold"},
+  {en:"remorse", cn:"懊悔/自责/悔恨", color:"gold"},
+  {en:"revitalisation", cn:"新生/复兴/恢复元气", color:"gold"},
+  {en:"rhetoric", cn:"修辞学/华丽的辞藻/花言巧语", color:"gold"},
+  {en:"ridge", cn:"山脊/山脉/屋脊", color:"gold"},
+  {en:"ruffle", cn:"褶皱/花边/弄皱/激怒/扰乱", color:"gold"},
+  {en:"ruinous", cn:"毁灭性的/破坏性的", color:"gold"},
+  {en:"saturated", cn:"饱和的/渗透的/深颜色的", color:"gold"},
+  {en:"saucer", cn:"茶托/碟子", color:"gold"},
+  {en:"sausage", cn:"香肠/腊肠", color:"gold"},
+  {en:"scare", cn:"惊吓/使受惊", color:"gold"},
+  {en:"scenario", cn:"小说的情节梗概/事态/局面", color:"gold"},
+  {en:"scholarship", cn:"奖学金/学识/学术成就", color:"gold"},
+  {en:"scissor", cn:"剪刀/剪子", color:"gold"},
+  {en:"scold", cn:"责骂/斥责", color:"gold"},
+  {en:"scourge", cn:"天谴/灾难", color:"gold"},
+  {en:"scramble", cn:"爬行/攀登/抢夺", color:"gold"},
+  {en:"scratch", cn:"抓痕/刮/搔/抓/划", color:"gold"},
+  {en:"detest", cn:"憎恶/痛恨", color:"gold"},
+  {en:"diagnosis", cn:"诊断/调查分析", color:"gold"},
+  {en:"dignity", cn:"尊严/高贵", color:"gold"},
+  {en:"disposition", cn:"性情/气质/布置", color:"gold"},
+  {en:"disregard", cn:"漠视/忽视/不理会", color:"gold"},
+  {en:"empower", cn:"授权/使能够/准许", color:"gold"},
+  {en:"enchanting", cn:"迷人的/迷惑的/妩媚的", color:"gold"},
+  {en:"encyclopedia", cn:"百科全书", color:"gold"},
+  {en:"endeavour", cn:"努力/尽力", color:"gold"},
+  {en:"endorsement", cn:"背书/签注/文件认可", color:"gold"},
+  {en:"exorbitant", cn:"过度的/价格过高的", color:"gold"},
+  {en:"expansion", cn:"膨胀/扩展/扩张", color:"gold"},
+  {en:"fellowship", cn:"友谊/会员资格/奖学金", color:"gold"},
+  {en:"finale", cn:"戏剧的最后一场/结局/终曲", color:"gold"},
+  {en:"flask", cn:"瓶/长颈瓶", color:"gold"},
+  {en:"flatter", cn:"过分夸赞/奉承/阿谀", color:"gold"},
+  {en:"adherence", cn:"黏着/忠诚/坚持", color:"gold"},
+  {en:"adjourn", cn:"延期/中止/推迟", color:"gold"},
+  {en:"apparent", cn:"明显的/表面上的", color:"gold"},
+  {en:"backbone", cn:"脊椎/中枢/骨干", color:"gold"},
+  {en:"bailout", cn:"紧急财政援助/紧急资助", color:"gold"},
+  {en:"banner", cn:"旗帜/标语/横幅标语或广告", color:"gold"},
+  {en:"barbarous", cn:"野蛮的/粗野的/残忍的/粗俗的", color:"gold"},
+  {en:"bargain", cn:"契约/合同/议价", color:"gold"},
+  {en:"barge", cn:"驳船/游艇", color:"gold"},
+  {en:"bark", cn:"树皮/狗叫/咆哮/大声喊出", color:"gold"},
+  {en:"barter", cn:"物品交换/实物交易", color:"gold"},
+  {en:"basement", cn:"地下室", color:"gold"},
+  {en:"celestial", cn:"天上的/天空的/天体的", color:"gold"},
+  {en:"censure", cn:"责难/批评/谴责", color:"gold"},
+  {en:"ceramic", cn:"陶瓷制品/陶瓷的", color:"gold"},
+  {en:"cereal", cn:"谷类食品/谷类", color:"gold"},
+  {en:"ceremonial", cn:"仪式/正式的/仪式的", color:"gold"},
+  {en:"chisel", cn:"凿子/砍凿", color:"gold"},
+  {en:"harmonious", cn:"和谐的/协调的", color:"gold"},
+  {en:"haven", cn:"港口/避难所", color:"gold"},
+  {en:"heady", cn:"令人兴奋的/飘飘然的/猛烈的", color:"gold"},
+  {en:"heed", cn:"注意/留意", color:"gold"},
+  {en:"impeachment", cn:"弹劾/控告/不信任", color:"gold"},
+  {en:"impede", cn:"阻止/妨碍", color:"gold"},
+  {en:"impending", cn:"逼近的/即将发生的", color:"gold"},
+  {en:"impenetrable", cn:"难以理解的/费解的", color:"gold"},
+  {en:"imperative", cn:"命令/命令的/强制的/紧急的", color:"gold"},
+  {en:"impotent", cn:"无力的/虚弱的", color:"gold"},
+  {en:"imprudent", cn:"轻率的/鲁莽的", color:"gold"},
+  {en:"intermittent", cn:"间歇的/断断续续的", color:"gold"},
+  {en:"intonation", cn:"语调/声调", color:"gold"},
+  {en:"irrespective", cn:"不顾的/不考虑的/无关的", color:"gold"},
+  {en:"itinerary", cn:"行程表/旅行路线/旅行计划", color:"gold"},
+  {en:"jagged", cn:"锯齿状的/外形参差不齐的", color:"gold"},
+  {en:"jargon", cn:"行话/术语", color:"gold"},
+  {en:"mosaic", cn:"马赛克/镶嵌画/马赛克的/镶嵌的", color:"gold"},
+  {en:"mosque", cn:"清真寺", color:"gold"},
+  {en:"multilateral", cn:"多边的/多国参加的", color:"gold"},
+  {en:"naval", cn:"海军的/军舰的", color:"gold"},
+  {en:"negligible", cn:"可忽略的/无关紧要的", color:"gold"},
+  {en:"nobility", cn:"贵族/高尚", color:"gold"},
+  {en:"nominee", cn:"被提名者/被任命者", color:"gold"},
+  {en:"notwithstanding", cn:"虽然/尽管", color:"gold"},
+  {en:"objection", cn:"反对/异议", color:"gold"},
+  {en:"obligatory", cn:"强制性的/必须的", color:"gold"},
+  {en:"obscure", cn:"朦胧的/模糊的/默默无闻的", color:"gold"},
+  {en:"override", cn:"否决/压倒/优先于", color:"gold"},
+  {en:"overthrow", cn:"打倒/推翻/颠覆", color:"gold"},
+  {en:"pacify", cn:"平静/安慰/抚慰", color:"gold"},
+  {en:"paddle", cn:"划桨/涉水", color:"gold"},
+  {en:"painstaking", cn:"苦干/辛苦/辛苦的/辛勤的", color:"gold"},
+  {en:"panic", cn:"惊慌/恐慌/恐慌的/惊慌的", color:"gold"},
+  {en:"panorama", cn:"全景/全景画/全景摄影", color:"gold"},
+  {en:"pantomime", cn:"手势/哑剧", color:"gold"},
+  {en:"scrutiny", cn:"仔细检查/注目/监督", color:"gold"},
+  {en:"seam", cn:"接缝/煤层/缝合/接合", color:"gold"},
+  {en:"seasoning", cn:"调味品/调料", color:"gold"},
+  {en:"sediment", cn:"沉淀物/沉积物/沉渣", color:"gold"},
+  {en:"seduce", cn:"引诱/诱惑", color:"gold"},
+  {en:"succinct", cn:"简明的/简洁的", color:"gold"},
+  {en:"succumb", cn:"屈服/屈从/因…死亡", color:"gold"},
+  {en:"sufficiency", cn:"充足/自满", color:"gold"},
+  {en:"sumptuous", cn:"华丽的/奢侈的", color:"gold"},
+  {en:"superiority", cn:"优势/优越/高傲", color:"gold"},
+  {en:"tariff", cn:"关税/关税表/税则", color:"gold"},
+  {en:"tattoo", cn:"纹身/刺花样", color:"gold"},
+  {en:"tease", cn:"揶揄/戏弄/逗惹", color:"gold"},
+  {en:"temperament", cn:"气质/性情/脾气/暴躁", color:"gold"},
+  {en:"temporal", cn:"世俗的/非宗教的/现世的/时间的/暂时的", color:"gold"},
+  {en:"tentative", cn:"试验性的/试探的/初步的", color:"gold"},
+  {en:"terminate", cn:"停止/结束", color:"gold"},
+  {en:"translucent", cn:"半透明的", color:"gold"},
+  {en:"tributary", cn:"河流的支流/附属国/进贡的/从属的/辅助的/支流的", color:"gold"},
+  {en:"clan", cn:"氏族/宗族/党派", color:"gold"},
+  {en:"clarity", cn:"清楚/明晰", color:"gold"},
+  {en:"clement", cn:"和蔼的/仁慈的/天气温和的", color:"gold"},
+  {en:"cliché", cn:"陈词滥调/陈腐的", color:"gold"},
+  {en:"cliff", cn:"悬崖/绝壁", color:"gold"},
+  {en:"clumsy", cn:"笨拙的/愚笨的/文体臃肿的", color:"gold"},
+  {en:"commentary", cn:"评论/解说", color:"gold"},
+  {en:"definitive", cn:"最后的/确定的/权威的/决定性的", color:"gold"},
+  {en:"dehydrate", cn:"脱水", color:"gold"},
+  {en:"deign", cn:"屈尊/降低身份", color:"gold"},
+  {en:"delinquency", cn:"青少年的行为不良/错失/债务税款的拖欠", color:"gold"},
+  {en:"deluge", cn:"洪水/泛滥/暴雨袭击", color:"gold"},
+  {en:"demographic", cn:"人口统计学的/人口统计的", color:"gold"},
+  {en:"detach", cn:"分开/派遣", color:"gold"},
+  {en:"tumble", cn:"翻倒/摔倒/滚动/暴跌", color:"gold"},
+  {en:"ultraviolet", cn:"紫外线/紫外线的", color:"gold"},
+  {en:"unaffected", cn:"不矫揉造作的/自然的/未受影响的", color:"gold"},
+  {en:"utilisation", cn:"利用/使用", color:"gold"},
+  {en:"utmost", cn:"极限/最大限度/极度的/最大限度的", color:"gold"},
+  {en:"utter", cn:"发出/表达/完全的/彻底的", color:"gold"},
+  {en:"valve", cn:"阀/活门", color:"gold"},
+  {en:"vanish", cn:"消失/突然不见", color:"gold"},
+  {en:"vanquish", cn:"征服/击败/克服", color:"gold"},
+  {en:"velvet", cn:"天鹅绒/天鹅绒的", color:"gold"},
+  {en:"vengeance", cn:"报复/复仇", color:"gold"},
+  {en:"virtuoso", cn:"艺术大师/艺术爱好者/行家里手的", color:"gold"},
+  {en:"affiliate", cn:"隶属/接纳为成员", color:"gold"},
+  {en:"affirmation", cn:"断言/主张/肯定", color:"gold"},
+  {en:"affluent", cn:"富裕的/丰富的/流畅的", color:"gold"},
+  {en:"beacon", cn:"烟火/灯塔/照亮", color:"gold"},
+  {en:"bead", cn:"珠子/水珠", color:"gold"},
+  {en:"bellow", cn:"风箱", color:"gold"},
+  {en:"belonging", cn:"财产/指除土地建筑物等之外的财产", color:"gold"},
+  {en:"charisma", cn:"非凡的领导力/魅力", color:"gold"},
+  {en:"choir", cn:"唱诗班/合唱队", color:"gold"},
+  {en:"chunk", cn:"大块/某物相当大的部分", color:"gold"},
+  {en:"circumscribe", cn:"在周围画线/限制", color:"gold"},
+  {en:"circumvent", cn:"规避/围绕/智取", color:"gold"},
+  {en:"clamour", cn:"喧闹/吵嚷/叫喊", color:"gold"},
+  {en:"abstinence", cn:"节制/节欲/戒酒", color:"gold"},
+  {en:"abysmal", cn:"深不可测的/恶劣的/极坏的", color:"gold"},
+  {en:"accessible", cn:"易接近的/可到达的/易受影响的", color:"gold"},
+  {en:"accessory", cn:"附件/配饰/附属的/补充的", color:"gold"},
+  {en:"accomplice", cn:"同谋者/帮凶", color:"gold"},
+  {en:"accountable", cn:"应负责的/有责任的/可解释的", color:"gold"},
+  {en:"accredit", cn:"信任/相信/授权/委任/认可/达到标准", color:"gold"},
+  {en:"accuser", cn:"原告", color:"gold"},
+  {en:"acquaintance", cn:"相识/熟人/了解/知道", color:"gold"},
+  {en:"acquiesce", cn:"默许/勉强同意", color:"gold"},
+  {en:"acquit", cn:"宣告无罪/推卸义务和责任", color:"gold"},
+  {en:"acronym", cn:"首字母缩写词", color:"gold"},
+  {en:"adapter", cn:"适配器/改编者", color:"gold"},
+  {en:"addictive", cn:"上瘾的/沉溺的", color:"gold"},
+  {en:"adept", cn:"老手/擅长者/熟练的/拿手的", color:"gold"},
+  {en:"chivalry", cn:"骑士气概/骑士精神/骑士制度", color:"gold"},
+  {en:"chord", cn:"弦/和音/共鸣", color:"gold"},
+  {en:"chronic", cn:"慢性的/长期的/习惯性的", color:"gold"},
+  {en:"chronological", cn:"按年代顺序排列的", color:"gold"},
+  {en:"chubby", cn:"丰满的/圆胖的", color:"gold"},
+  {en:"constrict", cn:"缩紧/压缩", color:"gold"},
+  {en:"consulate", cn:"领事/领事馆", color:"gold"},
+  {en:"covert", cn:"隐蔽处/隐藏的/秘密的", color:"gold"},
+  {en:"crease", cn:"折缝/褶痕/使起皱", color:"gold"},
+  {en:"culinary", cn:"烹饪的/厨房的", color:"gold"},
+  {en:"cylinder", cn:"圆桶/汽缸", color:"gold"},
+  {en:"daunting", cn:"使人畏缩的/令人畏惧的", color:"gold"},
+  {en:"deafening", cn:"震耳欲聋的/极喧哗的", color:"gold"},
+  {en:"dearth", cn:"缺乏/供应不足", color:"gold"},
+  {en:"debris", cn:"碎片/残骸", color:"gold"},
+  {en:"decent", cn:"正派的/端庄的/得体的", color:"gold"},
+  {en:"decimal", cn:"十进制的/小数的/以十为基础的", color:"gold"},
+  {en:"decipher", cn:"密电译文/详解密码等/破译", color:"gold"},
+  {en:"kernel", cn:"硬壳果仁/去壳的麦粒/谷粒", color:"gold"},
+  {en:"languish", cn:"憔悴/衰弱/衰败/受苦/折磨", color:"gold"},
+  {en:"lash", cn:"鞭子/鞭打/责骂/抨击", color:"gold"},
+  {en:"laudable", cn:"值得赞美的/值得称赞的", color:"gold"},
+  {en:"laundry", cn:"洗衣/洗衣店/待洗的衣服", color:"gold"},
+  {en:"laurel", cn:"桂冠/荣誉/殊荣/戴桂冠/授予殊荣", color:"gold"},
+  {en:"lava", cn:"熔岩/火山岩", color:"gold"},
+  {en:"lurk", cn:"埋伏/潜伏/隐藏", color:"gold"},
+  {en:"malnutrition", cn:"营养失调/营养不良", color:"gold"},
+  {en:"mandatory", cn:"命令的/强制的/托管的", color:"gold"},
+  {en:"mania", cn:"狂躁/狂热/癖好", color:"gold"},
+  {en:"manipulate", cn:"操作/操纵/利用", color:"gold"},
+  {en:"manoeuvre", cn:"技巧/手法/花招/策略", color:"gold"},
+  {en:"mansion", cn:"大厦/官邸/公寓", color:"gold"},
+  {en:"mantle", cn:"斗篷/覆盖物/重要工作等责任/职位/覆盖", color:"gold"},
+  {en:"marathon", cn:"马拉松", color:"gold"},
+  {en:"marginal", cn:"边缘的/边际的", color:"gold"},
+  {en:"morality", cn:"道德/美德/伦理体系", color:"gold"},
+  {en:"impudent", cn:"粗鲁的/无礼的", color:"gold"},
+  {en:"indigenous", cn:"本土的/固有的/土生土长的", color:"gold"},
+  {en:"infringe", cn:"触犯/违反/侵害", color:"gold"},
+  {en:"kerosene", cn:"煤油/火油", color:"gold"},
+  {en:"obsolete", cn:"荒废的/陈旧的/废词/陈腐的人", color:"gold"},
+  {en:"outlaw", cn:"罪犯/违法/不合法/禁止", color:"gold"},
+  {en:"outright", cn:"直率的地/完全的地/彻底的地", color:"gold"},
+  {en:"outstrip", cn:"超过/胜过/跑过", color:"gold"},
+  {en:"patriot", cn:"爱国者/爱国主义者", color:"gold"},
+  {en:"patron", cn:"赞助人/资助人/守护神", color:"gold"},
+  {en:"marshland", cn:"沼泽地", color:"gold"},
+  {en:"neutralise", cn:"中立/使无效/中和", color:"gold"},
+  {en:"nibble", cn:"一点一点地咬", color:"gold"},
+  // --- New words from batch 14 images ---
+  // Story 13 (lime)
+  {en:"abound", cn:"富于/充满", color:"lime"},
+  {en:"accuse", cn:"指控/指责", color:"lime"},
+  {en:"accustomed", cn:"习惯的/通常的", color:"lime"},
+  {en:"authorise", cn:"批准/授权", color:"lime"},
+  {en:"correspondence", cn:"一致/通信/信件", color:"lime"},
+  {en:"corruption", cn:"腐败/贪污/堕落", color:"lime"},
+  {en:"counsel", cn:"忠告/律师/商议", color:"lime"},
+  {en:"doctrine", cn:"教条/学说/主义", color:"lime"},
+  {en:"endorse", cn:"背书/赞同/签署", color:"lime"},
+  {en:"expire", cn:"终止/到期", color:"lime"},
+  {en:"expertise", cn:"专家意见/专门技术", color:"lime"},
+  {en:"intermediate", cn:"中间的/居中的", color:"lime"},
+  {en:"internal", cn:"内在的/国内的", color:"lime"},
+  {en:"justify", cn:"辩护/辩解/证明", color:"lime"},
+  {en:"justification", cn:"正当理由/辩护", color:"lime"},
+  {en:"jury", cn:"陪审团/评判委员会", color:"lime"},
+  {en:"null", cn:"无效的/无意义的", color:"lime"},
+  {en:"overt", cn:"明显的/公然的", color:"lime"},
+  {en:"precursor", cn:"先驱/前辈/前兆", color:"lime"},
+  {en:"predict", cn:"预言/预报", color:"lime"},
+  {en:"prefix", cn:"前缀", color:"lime"},
+  {en:"pregnant", cn:"怀孕的/孕育的", color:"lime"},
+  {en:"preliminary", cn:"预备的/初步的", color:"lime"},
+  {en:"premise", cn:"前提/假定", color:"lime"},
+  {en:"prescription", cn:"规定/处方/药方", color:"lime"},
+  {en:"presentation", cn:"介绍/陈述/赠送", color:"lime"},
+  {en:"preside", cn:"主持/指挥", color:"lime"},
+  {en:"prestige", cn:"声望/威望/威信", color:"lime"},
+  {en:"prestigious", cn:"享有声望的/声望很高的", color:"lime"},
+  {en:"priority", cn:"优先/优先权", color:"lime"},
+  {en:"probe", cn:"调查/查究/探究", color:"lime"},
+  {en:"profession", cn:"职业/业内人士/声明", color:"lime"},
+  {en:"proficient", cn:"能手/熟练的/精通的", color:"lime"},
+  {en:"radical", cn:"根本的/激进的", color:"lime"},
+  {en:"referee", cn:"裁判员/推荐人", color:"lime"},
+  {en:"refrain", cn:"节制/避免/制止", color:"lime"},
+  {en:"retort", cn:"反驳/反击/回报", color:"lime"},
+  {en:"subsidise", cn:"资助/给津贴", color:"lime"},
+  {en:"substitute", cn:"代替/替换", color:"lime"},
+  {en:"successive", cn:"继承的/连续的", color:"lime"},
+  {en:"sue", cn:"控告/起诉/请愿", color:"lime"},
+  // Story 14 (magenta)
+  {en:"abrupt", cn:"突然的/粗鲁的/生硬的", color:"magenta"},
+  {en:"authentic", cn:"可信的/真实的", color:"magenta"},
+  {en:"bustle", cn:"喧嚣/匆匆忙忙", color:"magenta"},
+  {en:"conquest", cn:"攻克/征服", color:"magenta"},
+  {en:"consequent", cn:"作为结果的/随之发生的", color:"magenta"},
+  {en:"consign", cn:"交付/放逐/委托", color:"magenta"},
+  {en:"corrode", cn:"腐蚀/侵蚀", color:"magenta"},
+  {en:"costume", cn:"装束/服装/戏服", color:"magenta"},
+  {en:"countless", cn:"无数的/数不尽的", color:"magenta"},
+  {en:"cradle", cn:"摇篮/发源地", color:"magenta"},
+  {en:"crawl", cn:"爬行/蠕动/徐徐行进", color:"magenta"},
+  {en:"exploration", cn:"探险/勘探", color:"magenta"},
+  {en:"exquisite", cn:"精致的/细腻的/敏锐的", color:"magenta"},
+  {en:"fiction", cn:"小说/虚构", color:"magenta"},
+  {en:"fuel", cn:"燃料/添加燃料/助长", color:"magenta"},
+  {en:"furious", cn:"狂怒的/狂暴的", color:"magenta"},
+  {en:"fuss", cn:"忙乱/骚乱/大惊小怪", color:"magenta"},
+  {en:"glorious", cn:"光荣的/辉煌的", color:"magenta"},
+  {en:"grant", cn:"拨款/补助金/授予", color:"magenta"},
+  {en:"heal", cn:"治愈/医治/结束", color:"magenta"},
+  {en:"hectare", cn:"公顷", color:"magenta"},
+  {en:"hurl", cn:"猛投/猛掷", color:"magenta"},
+  {en:"hymn", cn:"赞美诗/圣歌", color:"magenta"},
+  {en:"idiom", cn:"成语/方言/习惯用语", color:"magenta"},
+  {en:"lengthy", cn:"冗长的/过分的", color:"magenta"},
+  {en:"lighthouse", cn:"灯塔", color:"magenta"},
+  {en:"limp", cn:"跛行/蹒跚/柔软的", color:"magenta"},
+  {en:"linger", cn:"逗留/继续留存/拖延", color:"magenta"},
+  {en:"minimum", cn:"最小值/最小化", color:"magenta"},
+  {en:"motion", cn:"运动/动作", color:"magenta"},
+  {en:"mortal", cn:"必死的/致命的/人类的", color:"magenta"},
+  {en:"mould", cn:"模具/肥土/霉菌", color:"magenta"},
+  {en:"motivation", cn:"动机/刺激/激励", color:"magenta"},
+  {en:"nostril", cn:"鼻孔", color:"magenta"},
+  {en:"outburst", cn:"爆发/突发/迸发", color:"magenta"},
+  {en:"overnight", cn:"通宵的/晚上的/前夜的", color:"magenta"},
+  {en:"potent", cn:"强有力的/有效的", color:"magenta"},
+  {en:"resume", cn:"中断后重新开始", color:"magenta"},
+  {en:"retail", cn:"零售/零卖", color:"magenta"},
+  {en:"retain", cn:"保持/保留", color:"magenta"},
+  {en:"retire", cn:"退休/引退/退却", color:"magenta"},
+  {en:"superb", cn:"庄重的/卓越的/华丽的", color:"magenta"},
+  {en:"tremendous", cn:"巨大的/极大的", color:"magenta"},
+  {en:"vigorous", cn:"积极的/精力旺盛的", color:"magenta"},
+  // Story 15 (navy)
+  {en:"activate", cn:"刺激/激活/有活力", color:"navy"},
+  {en:"approximate", cn:"近似的/大约的", color:"navy"},
+  {en:"apt", cn:"有倾向的/灵敏的/灵巧的", color:"navy"},
+  {en:"curl", cn:"卷毛/卷曲", color:"navy"},
+  {en:"despise", cn:"轻视/鄙视", color:"navy"},
+  {en:"dock", cn:"码头/船坞/停靠", color:"navy"},
+  {en:"donkey", cn:"驴子/笨蛋/顽固者", color:"navy"},
+  {en:"doze", cn:"瞌睡/假寐", color:"navy"},
+  {en:"frown", cn:"皱眉/蹙额/反对", color:"navy"},
+  {en:"minimal", cn:"最小的/最小限度的", color:"navy"},
+  {en:"revenge", cn:"报仇/复仇", color:"navy"},
+  {en:"rhythm", cn:"节奏/韵律", color:"navy"},
+  {en:"ribbon", cn:"缎带/丝带/带状物", color:"navy"},
+  {en:"rigid", cn:"死板的/刚硬的/固定的", color:"navy"},
+  {en:"rim", cn:"边/边缘/镶边", color:"navy"},
+  {en:"shiver", cn:"冷颤/战抖/发抖", color:"navy"},
+  {en:"shortage", cn:"不足/缺少", color:"navy"},
+  {en:"stain", cn:"污点/瑕疵/染污", color:"navy"},
+  {en:"subside", cn:"下沉/平息/减退", color:"navy"},
+  {en:"suburb", cn:"市郊/郊区", color:"navy"},
+  {en:"summon", cn:"召唤/传唤/召集", color:"navy"},
+  {en:"supersonic", cn:"超声波的/超音速的", color:"navy"},
+  {en:"thirst", cn:"口渴/渴望", color:"navy"},
+  {en:"threaten", cn:"威胁/恐吓", color:"navy"},
+  {en:"tighten", cn:"变紧/扣紧", color:"navy"},
+  {en:"tile", cn:"瓦片/瓷砖", color:"navy"},
+  {en:"transparent", cn:"透明的/显然的", color:"navy"},
+  {en:"tray", cn:"盘/碟", color:"navy"},
+  {en:"treasure", cn:"财宝/珍品/珍爱", color:"navy"},
+  {en:"trench", cn:"沟渠/堑壕/挖战壕", color:"navy"},
+  {en:"velocity", cn:"速度/速率/迅速", color:"navy"},
+  {en:"venerable", cn:"庄严的/值得尊敬的", color:"navy"},
+  {en:"virtue", cn:"德行/贞操/优点", color:"navy"},
+];
+
+// Sort words alphabetically by English word
+words.sort((a, b) => a.en.localeCompare(b.en, 'en'));
+
+const colorMap = {
+  yellow: {dot:"dot-yellow", label:"故事一"},
+  green: {dot:"dot-green", label:"故事二"},
+  blue: {dot:"dot-blue", label:"故事三"},
+  purple: {dot:"dot-purple", label:"故事四"},
+  orange: {dot:"dot-orange", label:"故事五"},
+  teal: {dot:"dot-teal", label:"故事六"},
+  red: {dot:"dot-red", label:"故事七"},
+  cyan: {dot:"dot-cyan", label:"故事八"},
+  pink: {dot:"dot-pink", label:"故事九"},
+  brown: {dot:"dot-brown", label:"故事十"},
+  gold: {dot:"dot-gold", label:"故事十一"},
+  indigo: {dot:"dot-indigo", label:"故事十二"},
+  lime: {dot:"dot-lime", label:"故事十三"},
+  magenta: {dot:"dot-magenta", label:"故事十四"},
+  navy: {dot:"dot-navy", label:"故事十五"},
+};
+
+const grid = document.getElementById("wordGrid");
+grid.classList.add("view-all");
+words.forEach(w => {
+  const card = document.createElement("div");
+  card.className = "word-card";
+  card.innerHTML = `<span class="dot ${colorMap[w.color].dot}"></span><span class="speaker" style="cursor:pointer;font-size:.85em;opacity:.6;">🔊</span><span class="en">${w.en}</span><span class="cn">${w.cn}</span><span class="star-icon" onclick="event.stopPropagation(); toggleStar(this.closest('.word-card'))">★</span><span class="select-check">✓</span>`;
+  card.dataset.word = w.en;
+  grid.appendChild(card);
+});
+
+// ===== British English Pronunciation =====
+let voices = [];
+let ukVoice = null;
+
+function loadVoices() {
+  voices = speechSynthesis.getVoices();
+  // Prefer en-GB voice
+  ukVoice = voices.find(v => v.lang === 'en-GB' && /Google|Microsoft|Daniel|Serena|Kate|Hazel/i.test(v.name))
+          || voices.find(v => v.lang === 'en-GB')
+          || voices.find(v => v.lang === 'en_GB')
+          || null;
+}
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function speakWord(word, el) {
+  // Cancel any ongoing speech
+  speechSynthesis.cancel();
+
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-GB';
+  utter.rate = 1.0;
+  utter.pitch = 1.0;
+  if (ukVoice) utter.voice = ukVoice;
+
+  // Visual feedback
+  if (el) {
+    el.classList.add('speaking');
+    utter.onend = () => el.classList.remove('speaking');
+    utter.onerror = () => el.classList.remove('speaking');
+  }
+
+  speechSynthesis.speak(utter);
+}
+
+// Global state: whether all Chinese are currently shown
+let allCnShown = false;
+
+// Toggle all Chinese translations
+function toggleAllCn(show) {
+  const vWords = document.querySelectorAll('.v');
+  const cards = document.querySelectorAll('.word-card');
+  
+  allCnShown = show;
+  
+  vWords.forEach(el => {
+    if (show) {
+      el.classList.add('cn-shown');
+    } else {
+      el.classList.remove('cn-shown');
+    }
+  });
+  
+  cards.forEach(card => {
+    if (show) {
+      card.classList.add('cn-shown');
+    } else {
+      card.classList.remove('cn-shown');
+    }
+  });
+}
+
+// Add speaker icon to each vocabulary word
+document.querySelectorAll('.v').forEach(el => {
+  const icon = document.createElement('span');
+  icon.className = 'sp-icon';
+  icon.textContent = '🔊';
+  el.insertBefore(icon, el.firstChild);
+});
+
+// Click on vocabulary words in stories
+document.querySelectorAll('.v').forEach(el => {
+  el.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // If all Chinese are shown, clicking only plays pronunciation (no hide)
+    // If all Chinese are hidden, clicking shows this individual word's Chinese
+    if (!allCnShown) {
+      this.classList.toggle('cn-shown');
+    }
+    
+    // Extract the English word
+    const cnSpan = this.querySelector('.cn');
+    let word = this.textContent;
+    if (cnSpan) {
+      word = this.childNodes[1] ? this.childNodes[1].textContent.trim() : word;
+    }
+    // Clean up: take only letters
+    word = word.replace(/[^a-zA-Z]/g, '');
+    if (word) speakWord(word, this);
+  });
+});
+
+// Word list view mode: 'all', 'en', 'cn'
+let wordListView = 'all';
+
+function setWordView(mode) {
+  wordListView = mode;
+  const grid = document.getElementById("wordGrid");
+  
+  // Update grid class
+  grid.classList.remove("view-all", "view-en", "view-cn");
+  grid.classList.add("view-" + mode);
+  
+  // Update button active state
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === mode);
+  });
+  
+  // Clear all individual en-shown/cn-shown states when switching mode
+  document.querySelectorAll('.word-card').forEach(card => {
+    card.classList.remove('en-shown', 'cn-shown');
+  });
+  
+  // In "all" mode, Chinese is shown by default
+  if (mode === 'all') {
+    allCnShown = true;
+  } else {
+    allCnShown = false;
+  }
+}
+
+// Click on word cards in the word list
+document.querySelectorAll('.word-card').forEach(card => {
+  card.addEventListener('click', function() {
+    // If in select mode, toggle selection instead of showing translation
+    if (isSelectMode) {
+      this.classList.toggle('selected');
+      return;
+    }
+    
+    const word = this.dataset.word || this.querySelector('.en').textContent;
+    
+    if (wordListView === 'all') {
+      // All mode: same as before - toggle Chinese based on allCnShown
+      if (!allCnShown) {
+        this.classList.toggle('cn-shown');
+      }
+    } else if (wordListView === 'en') {
+      // English-only mode: clicking shows the Chinese translation
+      this.classList.toggle('cn-shown');
+    } else if (wordListView === 'cn') {
+      // Chinese-only mode: clicking shows the English word
+      this.classList.toggle('en-shown');
+    }
+    
+    if (word) speakWord(word, this);
+  });
+});
+
+// ===== Star / Important Word Functionality =====
+let isSelectMode = false;
+let filterStarred = false;
+let starredWords = JSON.parse(localStorage.getItem('starredWords') || '[]');
+
+// Initialize starred state from localStorage
+function initStarredWords() {
+  const cards = document.querySelectorAll('.word-card');
+  cards.forEach(card => {
+    const word = card.dataset.word;
+    if (starredWords.includes(word)) {
+      card.classList.add('starred');
+    }
+  });
+  updateStarCount();
+}
+initStarredWords();
+
+// Toggle star for a single card
+function toggleStar(card) {
+  const word = card.dataset.word;
+  const isStarred = card.classList.toggle('starred');
+  
+  if (isStarred) {
+    if (!starredWords.includes(word)) {
+      starredWords.push(word);
+    }
+  } else {
+    starredWords = starredWords.filter(w => w !== word);
+  }
+  
+  localStorage.setItem('starredWords', JSON.stringify(starredWords));
+  updateStarCount();
+}
+
+// Update star count display
+function updateStarCount() {
+  const countEl = document.getElementById('starCount');
+  const count = document.querySelectorAll('.word-card.starred').length;
+  countEl.textContent = `已标记 ${count} 个重点词`;
+}
+
+// Toggle selection mode
+function toggleSelectMode() {
+  isSelectMode = !isSelectMode;
+  const grid = document.getElementById('wordGrid');
+  const btn = document.getElementById('selectModeBtn');
+  const selectAllBtn = document.getElementById('selectAllBtn');
+  const starBtn = document.getElementById('starSelectedBtn');
+  const unstarBtn = document.getElementById('unstarSelectedBtn');
+  
+  grid.classList.toggle('select-mode', isSelectMode);
+  btn.classList.toggle('active', isSelectMode);
+  btn.textContent = isSelectMode ? '❌ 退出选择' : '☑️ 选择模式';
+  
+  selectAllBtn.style.display = isSelectMode ? '' : 'none';
+  starBtn.style.display = isSelectMode ? '' : 'none';
+  unstarBtn.style.display = isSelectMode ? '' : 'none';
+  
+  // Clear selections when exiting
+  if (!isSelectMode) {
+    document.querySelectorAll('.word-card.selected').forEach(c => c.classList.remove('selected'));
+    selectAllBtn.textContent = '✅ 全选';
+  }
+}
+
+// Select all / deselect all cards
+function selectAllCards() {
+  const cards = document.querySelectorAll('.word-grid .word-card');
+  const btn = document.getElementById('selectAllBtn');
+  const selectedCount = document.querySelectorAll('.word-grid .word-card.selected').length;
+  const allSelected = selectedCount === cards.length;
+  
+  cards.forEach(card => {
+    card.classList.toggle('selected', !allSelected);
+  });
+  
+  btn.textContent = allSelected ? '✅ 全选' : '↩️ 取消全选';
+}
+
+// Batch star or unstar selected cards
+function batchStar(star) {
+  const selected = document.querySelectorAll('.word-grid .word-card.selected');
+  if (selected.length === 0) {
+    alert('请先选择要操作的单词');
+    return;
+  }
+  
+  selected.forEach(card => {
+    const word = card.dataset.word;
+    if (star) {
+      card.classList.add('starred');
+      if (!starredWords.includes(word)) {
+        starredWords.push(word);
+      }
+    } else {
+      card.classList.remove('starred');
+      starredWords = starredWords.filter(w => w !== word);
+    }
+    card.classList.remove('selected');
+  });
+  
+  localStorage.setItem('starredWords', JSON.stringify(starredWords));
+  updateStarCount();
+  
+  // Reset select all button text
+  document.getElementById('selectAllBtn').textContent = '✅ 全选';
+}
+
+// Toggle filter to show only starred words
+function toggleFilterStarred() {
+  filterStarred = !filterStarred;
+  const grid = document.getElementById('wordGrid');
+  const btn = document.getElementById('filterStarredBtn');
+  
+  grid.classList.toggle('filter-starred', filterStarred);
+  btn.classList.toggle('active', filterStarred);
+  btn.textContent = filterStarred ? '📋 显示全部' : '🌟 只看重点';
+}
+
+// Fallback: if speechSynthesis not available, use audio API
+function loadBackupAudio(word) {
+  // This would use a TTS service as fallback if needed
+  console.log('Speech synthesis not available for: ' + word);
+}
+
+// --- Click nav bar to scroll to top ---
+document.getElementById('nav').addEventListener('click', function(e) {
+  // Don't trigger if clicking a link or button
+  if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
+
+// --- Collapse story headers ---
+document.querySelectorAll('.story-header').forEach(header => {
+  header.addEventListener('click', function(e) {
+    // Don't toggle if clicking a link inside
+    if (e.target.tagName === 'A') return;
+    this.classList.toggle('collapsed');
+    // Toggle visibility of sibling paragraphs
+    const story = this.closest('.story');
+    if (story) {
+      const paras = story.querySelectorAll('.para');
+      paras.forEach(p => {
+        p.style.display = this.classList.contains('collapsed') ? 'none' : '';
+      });
+    }
+  });
+});
+
+// --- Toggle nav bar ---
+function toggleNav() {
+  const nav = document.getElementById('nav');
+  nav.classList.toggle('collapsed');
+  const btn = nav.querySelector('.nav-toggle');
+  if (nav.classList.contains('collapsed')) {
+    btn.innerHTML = '☰ 展开菜单';
+  } else {
+    btn.innerHTML = '收起菜单';
+  }
+}
+
+// Auto-collapse nav after clicking a link
+document.querySelectorAll('#nav a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const targetId = link.getAttribute('href').slice(1);
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    const nav = document.getElementById('nav');
+    nav.classList.add('collapsed');
+    const btn = nav.querySelector('.nav-toggle');
+    btn.innerHTML = '☰ 展开菜单';
+    // Delay to let nav collapse, then scroll with offset
+    setTimeout(() => {
+      const navHeight = nav.offsetHeight;
+      const y = target.offsetTop - navHeight - 20;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }, 50);
+  });
+});
+
+// Nav active state
+const navLinks = document.querySelectorAll("nav a");
+const stories = document.querySelectorAll(".story, .word-list-section");
+window.addEventListener("scroll", () => {
+  let current = "";
+  stories.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.remove("active");
+    if (a.getAttribute("href") === "#" + current) a.classList.add("active");
+  });
+});
+</script>
+
+</body>
+</html>
